@@ -108,10 +108,47 @@ bool patch_db::lookup(
 	//              PLACE YOUR CODE HERE                     //
 	///////////////////////////////////////////////////////////
 
-	// dummy implementation: always returns the center of the 
-	// patch indexed by top_/2 as the result of the lookup operation
+    double bestSSD; // current best sum of square differences value
+    bestSSD = 255*255*3*plen_;
+    match = -1;
 
-	match = top_/2;
+    // loop thru each path
+    for (int indexPatch = 0; indexPatch < top_; indexPatch++)
+    {
+        int sourceValue;
+        double patchSSD = 0.0;
+        int matSize = 2* w_ + 1;
+        int pixelCoord[2];
+
+        // for each pixel of patch. 
+        for (int iRow = 0; iRow < matSize; iRow++)
+        {
+            for (int iCol = 0; iCol < matSize ; iCol++)
+            {
+                // Ignore unfilled pixel
+                if (!target_unfilled(iRow, iCol))
+                {
+                    pixelCoord[0] = patch_center_coords_(indexPatch, 0) - w_ + iRow;
+                    pixelCoord[1] = patch_center_coords_(indexPatch, 1) - w_ + iCol;
+                    // Calculate sum of squared diff for each channel
+                    patchSSD += pow((target_planes[0](iRow, iCol) - 
+                            im_(pixelCoord[0], pixelCoord[1]).r), 2);
+                    patchSSD += pow((target_planes[1](iRow, iCol) - 
+                            im_(pixelCoord[1], pixelCoord[1]).g), 2);
+                    patchSSD += pow((target_planes[2](iRow, iCol) - 
+                            im_(pixelCoord[2], pixelCoord[1]).b), 2);
+                }
+            }
+        }
+
+        if (patchSSD < bestSSD)
+        {
+            bestSSD = patchSSD;
+            match = indexPatch;
+        }
+    }
+
+
 
 	///////////////////////////////////////////////////////////
 	//     DO NOT CHANGE ANYTHING BELOW THIS LINE            //

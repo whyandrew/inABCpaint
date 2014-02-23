@@ -62,7 +62,7 @@ double compute_D(psi& PSI,
 				 vnl_double_2& gradient, 
 				 vnl_double_2& front_normal)
 {
-
+    return 1;
 	// holds the perpendicular to the gradient
 	vnl_double_2 grad_normal;    
 
@@ -116,8 +116,27 @@ double compute_C(psi& PSI, const vil_image_view<double>& C,
 	//              PLACE YOUR CODE HERE                     //
 	///////////////////////////////////////////////////////////
 
-	// dummy routine
-	return 1;
+    // Sum confidence of all pixels in the patch and divide by pixel#
+
+    double sum = 0.0;
+    int i, j;
+    PSI.begin();
+    unsigned counter = 0;
+
+    do
+    {
+        PSI.image_coord(i, j);
+        // UNfilled pixel has C==0 anyway, no need to check unfill
+        sum += C(i, j);
+
+#ifdef DEBUG320
+        counter ++;
+#endif
+
+    } while (PSI.next());
+
+    double totalSize = PSI.sz() * PSI.sz();
+    return sum / totalSize;
 
 	///////////////////////////////////////////////////////////
 	//     DO NOT CHANGE ANYTHING BELOW THIS LINE            //
