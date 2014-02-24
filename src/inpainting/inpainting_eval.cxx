@@ -77,8 +77,8 @@ double compute_D(psi& PSI,
 		if (compute_normal(PSI, fill_front, front_normal)) {
 			double dotp;
 
-			dotp = fabs(dot_product(grad_normal, front_normal))/alpha;
-
+			//dotp = fabs(dot_product(grad_normal, front_normal))/alpha;
+            dotp = grad_normal.size();
 			return dotp;
 		}
 		if (alpha > 0) 
@@ -191,42 +191,83 @@ bool compute_gradient(psi& PSI,
 	int winRad = 1;
 	int winSize = 2 * winRad + 1; // 2*1 + 1 = 3
 	int patSize = PSI.sz();
-	int patWin = PSI.w();
-	int lowCoord[2];
-	int highCoord[2];
-	int lowValue = 260;
-	int highValue = 0;
-	int highestDiff = 0;
+    int lowestCoord[2];
+    int highestCoord[2];
+	int highestDiff = -1;
 
 	// Make copies of values
 	vnl_matrix<int> valid_mat;
 	vnl_matrix<int> unfilled_mat;
 	vnl_matrix<double> grayscale_mat;
 
-	get_pixels(inpainted_grayscale, grayscale_mat, valid_mat);
-	get_pixels(unfilled, unfilled_mat, valid_mat);
+	PSI.get_pixels(inpainted_grayscale, grayscale_mat, valid_mat);
+	PSI.get_pixels(unfilled, unfilled_mat, valid_mat);
 
+    highestCoord[0] = -1; // use to check for path with only single filled pixel 
 	// loop through patch with sliding window
 	for (int x = 0; x < patSize - 2 * winRad; x++)
 	{
 		for (int y = 0; y < patSize - 2 * winRad; y++)
 		{
-			//find highest and lowest pixel grayscale
+			// Sliding window
+            int lowCoord[2];
+            int highCoord[2];
+            int lowValue = 300;
+	        int highValue = -1;
+            int pixelValue;
 			for (int winX = 0; winX < winSize; winX++)
 			{
 				for (int winY = 0; winY < winSize; winY++)
 				{
-					//if (un
+                    if (!(bool)unfilled_mat(y+winY, x+winX))
+                    {
+                        pixelValue = grayscale_mat(y+winY, x+winX);
+                        if (pixelValue < lowValue)
+                        {
+                            lowValue = pixelValue;
+                            lowCoord[0] = x+winX;
+                            lowCoord[1] = y+winY;
+                        }
+                        else if (pixelValue > highValue)
+                        {
+                            highValue = pixelValue;
+                            highCoord[0] = x+winX;
+                            highCoord[1] = y+winY;
+                        }
+                    } // finish 1 pixel of a window
 				}
-			}
+			} // finish one sliding window
+
+            if ((highValue - lowValue) > highestDiff)
+            {
+                highestDiff = (highValue - lowValue);
+                lowestCoord[0] = lowCoord[0];
+                lowestCoord[1] = lowCoord[1];
+                highestCoord[0] = highCoord[0];
+                highestCoord[1] = highCoord[1];
+            }
 		}
-	}
+	}// finish whole patch
 	
-
-
-        // dummy routine
-        grad(0) = 0;
-        grad(1) = 1; 
+    //Now compute dir and magnitude
+    if (highestCoord[0] == -1) 
+    { // highestCoord won't get set if only 1 filled pixel in path
+        return false;
+    }
+    else if (highestDiff == 0) 
+    { // uniform patch, return arbitary small non-0 value
+        grad(0) = 0.01;
+        grad(1) = 0;
+    }
+    else
+    {
+        // angle of directrion
+        double theta = atan2(highestCoord[1] - lowestCoord[1], 
+            highestCoord[0] - lowestCoord[0]);
+        // set grad to be horizontal with desired mag then rotate
+        grad(0) = highestDiff * cos(theta);
+        grad(1) = highestDiff * sin(theta);
+    }
 	return true;
 
 	///////////////////////////////////////////////////////////
