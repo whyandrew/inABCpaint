@@ -226,7 +226,7 @@ bool compute_gradient(psi& PSI,
                             lowCoord[0] = x+winX;
                             lowCoord[1] = y+winY;
                         }
-                        // >= to detect single-pixel only patch
+                        // >= to detect single-pixel only patch vs uniform patch
                         if (pixelValue >= highValue) 
                         {
                             highValue = pixelValue;
@@ -261,9 +261,14 @@ bool compute_gradient(psi& PSI,
     }
     else
     {
+		int deltaX = highestCoord[0] - lowestCoord[0];
+		int deltaY = highestCoord[1] - lowestCoord[1];
+
         // angle of directrion
-        double theta = atan2(highestCoord[1] - lowestCoord[1], 
-            highestCoord[0] - lowestCoord[0]);
+        double theta = atan2(deltaY, deltaX);
+		// use distance between highest & lowest to inverse-scale diff
+		highestDiff *= ( 1 / sqrt(deltaX * deltaX + deltaY * deltaY));
+
         // set grad to be horizontal with desired mag then rotate
         grad(0) = highestDiff * cos(theta);
         grad(1) = highestDiff * sin(theta);
