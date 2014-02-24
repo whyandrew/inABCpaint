@@ -62,7 +62,6 @@ double compute_D(psi& PSI,
 				 vnl_double_2& gradient, 
 				 vnl_double_2& front_normal)
 {
-    return 1;
 	// holds the perpendicular to the gradient
 	vnl_double_2 grad_normal;    
 
@@ -76,9 +75,9 @@ double compute_D(psi& PSI,
 		// now compute the normal of the fill front
 		if (compute_normal(PSI, fill_front, front_normal)) {
 			double dotp;
-
+            
 			//dotp = fabs(dot_product(grad_normal, front_normal))/alpha;
-            dotp = grad_normal.size();
+            dotp = grad_normal.magnitude();
 			return dotp;
 		}
 		if (alpha > 0) 
@@ -198,12 +197,11 @@ bool compute_gradient(psi& PSI,
 	// Make copies of values
 	vnl_matrix<int> valid_mat;
 	vnl_matrix<int> unfilled_mat;
-	vnl_matrix<double> grayscale_mat;
+	vnl_matrix<int> grayscale_mat;
 
 	PSI.get_pixels(inpainted_grayscale, grayscale_mat, valid_mat);
 	PSI.get_pixels(unfilled, unfilled_mat, valid_mat);
-
-    highestCoord[0] = -1; // use to check for path with only single filled pixel 
+ 
 	// loop through patch with sliding window
 	for (int x = 0; x < patSize - 2 * winRad; x++)
 	{
@@ -228,7 +226,8 @@ bool compute_gradient(psi& PSI,
                             lowCoord[0] = x+winX;
                             lowCoord[1] = y+winY;
                         }
-                        else if (pixelValue > highValue)
+                        // >= to detect single-pixel only patch
+                        if (pixelValue >= highValue) 
                         {
                             highValue = pixelValue;
                             highCoord[0] = x+winX;
@@ -250,8 +249,9 @@ bool compute_gradient(psi& PSI,
 	}// finish whole patch
 	
     //Now compute dir and magnitude
-    if (highestCoord[0] == -1) 
-    { // highestCoord won't get set if only 1 filled pixel in path
+    if (highestCoord[0] == lowestCoord[0] &&
+        highestCoord[1] == lowestCoord[1]) 
+    {  // only 1 single unfilled pixel in patch
         return false;
     }
     else if (highestDiff == 0) 
