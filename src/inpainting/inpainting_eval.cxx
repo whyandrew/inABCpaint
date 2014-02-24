@@ -183,6 +183,47 @@ bool compute_gradient(psi& PSI,
 	//              PLACE YOUR CODE HERE                     //
 	///////////////////////////////////////////////////////////
 
+	// Use a sliding 3x3 pixel window
+	// get max/min pixel to calculate gradient direction & magnitude
+	
+	if (PSI.w() == 0) return false;
+
+	int winRad = 1;
+	int winSize = 2 * winRad + 1; // 2*1 + 1 = 3
+	int patSize = PSI.sz();
+	int patWin = PSI.w();
+	int lowCoord[2];
+	int highCoord[2];
+	int lowValue = 260;
+	int highValue = 0;
+	int highestDiff = 0;
+
+	// Make copies of values
+	vnl_matrix<int> valid_mat;
+	vnl_matrix<int> unfilled_mat;
+	vnl_matrix<double> grayscale_mat;
+
+	get_pixels(inpainted_grayscale, grayscale_mat, valid_mat);
+	get_pixels(unfilled, unfilled_mat, valid_mat);
+
+	// loop through patch with sliding window
+	for (int x = 0; x < patSize - 2 * winRad; x++)
+	{
+		for (int y = 0; y < patSize - 2 * winRad; y++)
+		{
+			//find highest and lowest pixel grayscale
+			for (int winX = 0; winX < winSize; winX++)
+			{
+				for (int winY = 0; winY < winSize; winY++)
+				{
+					//if (un
+				}
+			}
+		}
+	}
+	
+
+
         // dummy routine
         grad(0) = 0;
         grad(1) = 1; 

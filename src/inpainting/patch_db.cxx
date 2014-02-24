@@ -134,12 +134,14 @@ bool patch_db::lookup(
                     patchSSD += pow((target_planes[0](iRow, iCol) - 
                             im_(pixelCoord[0], pixelCoord[1]).r), 2);
                     patchSSD += pow((target_planes[1](iRow, iCol) - 
-                            im_(pixelCoord[1], pixelCoord[1]).g), 2);
+                            im_(pixelCoord[0], pixelCoord[1]).g), 2);
                     patchSSD += pow((target_planes[2](iRow, iCol) - 
-                            im_(pixelCoord[2], pixelCoord[1]).b), 2);
+                            im_(pixelCoord[0], pixelCoord[1]).b), 2);
                 }
             }
         }
+
+
 
         if (patchSSD < bestSSD)
         {
