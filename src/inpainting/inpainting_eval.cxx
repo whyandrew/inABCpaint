@@ -158,24 +158,29 @@ bool compute_normal(psi& PSI,
 	/*	fit a 2nd-order polynomial to each of the curve's coordinate functions,
 		using weighted least squares with a Gaussian weight function */
 	
+    int winRad = PSI.w();
+
+    if (winRad <= 0)
+        return false;
+
 	// get local copies of fill_front data first
-	// if use PSI.get_pixels, can only get within window size?
-	//  if so what to do if window size is too small? check and resize out_matrix?
-		return false;
-	else if (
+    vnl_matrix<int> front_mat;
+    vnl_matrix<int> valid_mat;
+    PSI.get_pixels(fill_front, front_mat, valid_mat);
 	/*
 	If PSI.w_ is only 1, then patch is only 3 pixel across
 	which can only form 1 equation for 2nd-order, i.e. no solution.
-	Just do 1st-order estimate instead
+	Could get more pixel values from fill_front but..
+    Just do 1st-order estimate instead
 	*/
-
+    int matSize = front_mat.rows();
 	// Construct weighting function matrix
 	vnl_matrix<double> weight_mat(3, 3, 0); // only need 2nd-order so 3x3
 	weight_mat(0, 0) = exp(-1);
 	weight_mat(1, 1) = 1.0;
 	weight_mat(2, 2) = weight_mat(0, 0);
 	
-
+    
 
     return true;
 
