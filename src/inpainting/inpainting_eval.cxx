@@ -167,13 +167,42 @@ bool compute_normal(psi& PSI,
     vnl_matrix<int> front_mat;
     vnl_matrix<int> valid_mat;
     PSI.get_pixels(fill_front, front_mat, valid_mat);
-	/*
-	If PSI.w_ is only 1, then patch is only 3 pixel across
-	which can only form 1 equation for 2nd-order, i.e. no solution.
-	Could get more pixel values from fill_front but..
-    Just do 1st-order estimate instead
-	*/
     int matSize = front_mat.rows();
+    int dir = 0;
+    // Start at center pixel of patch, need to find it's derivative
+    int rowIndex = winRad;
+    int colIndex = winRad;
+    // vectors for x, y coordinates in paramater t=index
+    vnl_vector<int> XCoord(matSize * matSize);
+    vnl_vector<int> YCoord(matSize * matSize);
+    // Center pixel must be a fill-front by design
+    int vecSize = 1;
+    XCoord[0] = colIndex;
+    YCoord[0] = rowIndex;
+
+    while ((dir = fillFrontDirection(rowIndex, colIndex, front_mat)) >= 0)
+    {
+        switch (dir)
+        {
+        case 0:
+            break;
+        case 1:
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        case 5:
+            break;
+        case 6:
+            break;
+        case 7:
+            break;
+        }
+        vecSize++;
+    }
 	// Construct weighting function matrix
 	vnl_matrix<double> weight_mat(3, 3, 0); // only need 2nd-order so 3x3
 	weight_mat(0, 0) = exp(-1);
@@ -307,6 +336,84 @@ bool compute_gradient(psi& PSI,
 //     PLACE ANY ADDITIONAL CODE (IF ANY) HERE           //
 ///////////////////////////////////////////////////////////
 
+/*
+    Find connecting pixel of fill_front. and store x,y coord to vect
+    Return number of fill_front pixels, i.e. usable size of vector
+    Direction:
+        0  1  2
+        7  x  3
+        6  5  4
+*/
+static inline int fillFrontDirection(
+    int row, 
+    int col, 
+    vnl_vector<int>& rowVect,
+    vnl_vector<int>& colVect,
+    const vnl_matrix<int> fill_mat)
+{
+    int matSize = fill_mat.rows();
+    int vecSize;
+    bool haveMorePixel = true;
+    //sanity check
+    if (row >= matSize || row >= matSize || !fill_mat(row, col)) 
+        return -1;
 
+    // Starting pixel must be fill_front
+    rowVect[0] = row;
+    colVect[0] = col;
+    vecSize = 1;
+
+    while (haveMorePixel)
+    {
+        // Check for direct adjacent pixel first
+        if (row-1 >= 0 && fill_mat(row-1, col)) // up
+        {
+            row --;
+        }
+        else if (row+1 < matSize && fill_mat(row+1, col)) // down
+        {
+            row ++;
+        }
+        else if (col+1 < matSize && fill_mat(row, col+1)) //right
+        {
+            col++;
+        }
+        else if (col-1 >= 0 && fill_mat(row, col-1)) // left
+        {
+            col--;
+        }
+        // Check for diagonal
+        else if (row-1 >=0 && col-1 >= 0 && fill_mat(row-1, col-1)) // top-left
+        {
+            row--;
+            col--; 
+        }
+        else if (row-1 >=0 && col+1 >= 0 && fill_mat(row-1, col+1)) // top-right
+        {
+            row--;
+            col++;
+        }
+        else if (row+1 >=0 && col-1 >= 0 && fill_mat(row+1, col-1)) // bottom-left
+        {
+            row++;
+            col--;
+        }
+        else if (row+1 >=0 && col+1 >= 0 && fill_mat(row+1, col+1)) // bottom-right
+        {
+            row++;
+            col++;
+        }
+        else
+        {
+            haveMorePixel = false;
+        }
+
+        if (haveMorePixel)
+        {
+        }
+    }
+    
+    return vecSize;
+}
 /////////////////////////////////////////////////////////
 
