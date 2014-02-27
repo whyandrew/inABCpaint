@@ -166,7 +166,14 @@ bool compute_normal(psi& PSI,
 	// get local copies of fill_front data first
     vnl_matrix<int> front_mat;
     vnl_matrix<int> valid_mat;
+	// This need to be consistent in computing front-normal and patch-gradient
+	// DO NOT transpose matrix from get_pixels, use as is,
+	//	since only the scalar dot.product is needed at the end anyway.
+	// So as long as the relative direction of the front-normal and 
+	//	patch-gradient is correct, it's good. Save some operations
     PSI.get_pixels(fill_front, front_mat, valid_mat);
+	//front_mat.transpose(); // flip col and row
+
     int matSize = front_mat.rows();
     int dir = 0;
     // Start at center pixel of patch, need to find it's derivative
@@ -182,26 +189,7 @@ bool compute_normal(psi& PSI,
 
     while ((dir = fillFrontDirection(rowIndex, colIndex, front_mat)) >= 0)
     {
-        switch (dir)
-        {
-        case 0:
-            break;
-        case 1:
-            break;
-        case 2:
-            break;
-        case 3:
-            break;
-        case 4:
-            break;
-        case 5:
-            break;
-        case 6:
-            break;
-        case 7:
-            break;
-        }
-        vecSize++;
+
     }
 	// Construct weighting function matrix
 	vnl_matrix<double> weight_mat(3, 3, 0); // only need 2nd-order so 3x3
@@ -254,6 +242,9 @@ bool compute_gradient(psi& PSI,
 	PSI.get_pixels(inpainted_grayscale, grayscale_mat, valid_mat);
 	PSI.get_pixels(unfilled, unfilled_mat, valid_mat);
  
+	grayscale_mat.transpose();
+	unfilled_mat.transpose();
+
 	// loop through patch with sliding window
 	for (int x = 0; x < patSize - 2 * winRad; x++)
 	{
@@ -343,17 +334,31 @@ bool compute_gradient(psi& PSI,
         0  1  2
         7  x  3
         6  5  4
+	Vector index 0 is the center pixel (i.e. t = 0)
+	Look for connecting pixel from alternating sides of center pixel
+		so it wont' biased all to 1 side, especially in case where 
+		the fill_front is closed within the patch.
+	Assume t<0 for pixels to left of center pixel, and vice versa.
+	Odd index for pixels of t < 0, and even index for pixels of t > 0
+	If index is not used (unbalanced # of pixels on +/- sides of t), 
+		then set coord to -1.
 */
 static inline int fillFrontDirection(
     int row, 
     int col, 
     vnl_vector<int>& rowVect,
     vnl_vector<int>& colVect,
-    const vnl_matrix<int> fill_mat)
+    vnl_matrix<int> fill_mat)
 {
     int matSize = fill_mat.rows();
     int vecSize;
     bool haveMorePixel = true;
+	bool haveLeftPixel = true;
+	bool haveRightPixel = true;
+	bool isOdd = true;
+	int nextRow;
+	int nextCol;
+
     //sanity check
     if (row >= matSize || row >= matSize || !fill_mat(row, col)) 
         return -1;
@@ -362,9 +367,51 @@ static inline int fillFrontDirection(
     rowVect[0] = row;
     colVect[0] = col;
     vecSize = 1;
+	// Remove pixel as it parses so coords won't overlap
+	fill_mat(row, col) = 0;
+
+	// Set up the first pair of connecting pixels first to establish left/right
+	if (!(haveLeftPixel = checkLeftPixel(
+		row, col, rowVect+vecSize, colVect+vecSize, fill_mat)))
+	{
+		if (!(haveLeftPixel = checkTopBotPixel( row, col, 
+			rowVect+vecSize, colVect+vecSize, fill_mat)))
+		{
+			if (!(haveLeftPixel = checkRightPixel(
+				row, col, rowVect+vecSize, colVect+vecSize, fill_mat)))
+			{ // single pixel fill_front
+				return vecSize; // == 1
+			}
+		}
+	}
+
+
+	vecSize++;
+	haveRightPixel = checkRightPixel(row, col, 
+		rowVect+vecSize, colVect+vecSize, fill_mat);
+
+
+
 
     while (haveMorePixel)
     {
+		if (vecSize % 2) // odd index, look for left adjacent pixel
+		{
+			haveLeftPixel = checkLeftPixel(row, col, 
+				rowVect+vecSize, colVect+vecSize, fill_mat);
+			if (!haveLeftPixel)
+			{
+		}
+		else // even index, look for right side
+		{
+			haveRightPixel = checkRightPixel(row, col,
+				rowVect+vecSize, colVect+vecSize, fill_mat);
+		}
+
+		vecSize++;
+
+
+
         // Check for direct adjacent pixel first
         if (row-1 >= 0 && fill_mat(row-1, col)) // up
         {
@@ -415,5 +462,40 @@ static inline int fillFrontDirection(
     
     return vecSize;
 }
+
+// Check if any left adjacent pixel, including upper & lower left corners
+// Set return pixel coord to -1 if none is found
+static inline bool checkLeftPixel(
+	const int row,
+	const int col,
+	int& retRow,
+	int& retCol,
+	vnl_matrix<int>& front_mat)
+{
+	return true;
+}
+
+// Check if any right adjacent pixel, including upper & lower right
+static inline bool checkRightPixel(
+	const int row,
+	const int col, 
+	int& retRow,
+	int& retCol,
+	vnl_matrix<int>& front_mat)
+{
+	return true;
+}
+
+// check for direct adjacent pixel on top and bottom
+static inline bool checkTopBotPixel(
+	const int row,
+	const int col,
+	int& retRow,
+	int& retCol,
+	vnl_matrix<int>& front_mat)
+{
+	return true;
+}
+
 /////////////////////////////////////////////////////////
 
