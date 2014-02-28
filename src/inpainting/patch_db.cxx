@@ -107,29 +107,34 @@ bool patch_db::lookup(
 	///////////////////////////////////////////////////////////
 	//              PLACE YOUR CODE HERE                     //
 	///////////////////////////////////////////////////////////
-
+    
+    double maxSSD = 255*255*3*plen_;
+    double threshold = maxSSD / 50.0;
     double bestSSD; // current best sum of square differences value
-    bestSSD = 255*255*3*plen_;
+    bestSSD = maxSSD;
     match = -1;
 
-    // loop thru each path
+    double patchSSD;
+    int matSize = 2* w_ + 1;
+    int pixelCoord[2];
+    int baseCoord[2];
+
+    // loop thru each patch
     for (int indexPatch = 0; indexPatch < top_; indexPatch++)
     {
-        int sourceValue;
-        double patchSSD = 0.0;
-        int matSize = 2* w_ + 1;
-        int pixelCoord[2];
-
+        patchSSD = 0.0;
+        baseCoord[0] = patch_center_coords_(indexPatch, 0) - w_ ;
+        baseCoord[1] = patch_center_coords_(indexPatch, 1) - w_ ;
         // for each pixel of patch. 
         for (int iRow = 0; iRow < matSize; iRow++)
         {
             for (int iCol = 0; iCol < matSize ; iCol++)
             {
-                // Ignore unfilled pixel
-                if (!target_unfilled(iRow, iCol))
+                // Ignore unfilled pixel or if patchSSD is already too much
+                if (!target_unfilled(iRow, iCol) && patchSSD < bestSSD)
                 {
-                    pixelCoord[0] = patch_center_coords_(indexPatch, 0) - w_ + iRow;
-                    pixelCoord[1] = patch_center_coords_(indexPatch, 1) - w_ + iCol;
+                    pixelCoord[0] = baseCoord[0] + iRow;
+                    pixelCoord[1] = baseCoord[1] + iCol;
                     // Calculate sum of squared diff for each channel
                     patchSSD += pow((target_planes[0](iRow, iCol) - 
                             im_(pixelCoord[0], pixelCoord[1]).r), 2);
@@ -142,15 +147,13 @@ bool patch_db::lookup(
         }
 
 
-
         if (patchSSD < bestSSD)
         {
             bestSSD = patchSSD;
-            match = indexPatch;
+            match = indexPatch;            
         }
+
     }
-
-
 
 	///////////////////////////////////////////////////////////
 	//     DO NOT CHANGE ANYTHING BELOW THIS LINE            //

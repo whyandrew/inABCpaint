@@ -187,7 +187,7 @@ bool compute_normal(psi& PSI,
     XCoord[0] = colIndex;
     YCoord[0] = rowIndex;
 
-    while ((dir = fillFrontDirection(rowIndex, colIndex, front_mat)) >= 0)
+   // while ((dir = fillFrontDirection(rowIndex, colIndex, front_mat)) >= 0)
     {
 
     }
@@ -242,8 +242,8 @@ bool compute_gradient(psi& PSI,
 	PSI.get_pixels(inpainted_grayscale, grayscale_mat, valid_mat);
 	PSI.get_pixels(unfilled, unfilled_mat, valid_mat);
  
-	grayscale_mat.transpose();
-	unfilled_mat.transpose();
+	//grayscale_mat.transpose();
+	//unfilled_mat.transpose();
 
 	// loop through patch with sliding window
 	for (int x = 0; x < patSize - 2 * winRad; x++)
@@ -328,21 +328,56 @@ bool compute_gradient(psi& PSI,
 ///////////////////////////////////////////////////////////
 
 /*
-    Find connecting pixel of fill_front. and store x,y coord to vect
-    Return number of fill_front pixels, i.e. usable size of vector
-    Direction:
-        0  1  2
-        7  x  3
-        6  5  4
-	Vector index 0 is the center pixel (i.e. t = 0)
-	Look for connecting pixel from alternating sides of center pixel
-		so it wont' biased all to 1 side, especially in case where 
-		the fill_front is closed within the patch.
-	Assume t<0 for pixels to left of center pixel, and vice versa.
-	Odd index for pixels of t < 0, and even index for pixels of t > 0
-	If index is not used (unbalanced # of pixels on +/- sides of t), 
-		then set coord to -1.
-*/
+// Check if any left adjacent pixel, including upper & lower left corners
+// Set return pixel coord to -1 if none is found
+static inline bool checkLeftPixel(
+	const int row,
+	const int col,
+	int& retRow,
+	int& retCol,
+	vnl_matrix<int>& front_mat)
+{
+	return true;
+}
+
+// Check if any right adjacent pixel, including upper & lower right
+static inline bool checkRightPixel(
+	const int row,
+	const int col, 
+	int& retRow,
+	int& retCol,
+	vnl_matrix<int>& front_mat)
+{
+	return true;
+}
+
+// check for direct adjacent pixel on top and bottom
+static inline bool checkTopBotPixel(
+	const int row,
+	const int col,
+	int& retRow,
+	int& retCol,
+	vnl_matrix<int>& front_mat)
+{
+	return true;
+}
+
+//
+//    Find connecting pixel of fill_front. and store x,y coord to vect
+//    Return number of fill_front pixels, i.e. usable size of vector
+//    Direction:
+//        0  1  2
+//        7  x  3
+//        6  5  4
+//	Vector index 0 is the center pixel (i.e. t = 0)
+//	Look for connecting pixel from alternating sides of center pixel
+//		so it wont' biased all to 1 side, especially in case where 
+//		the fill_front is closed within the patch.
+//	Assume t<0 for pixels to left of center pixel, and vice versa.
+//	Odd index for pixels of t < 0, and even index for pixels of t > 0
+//	If index is not used (unbalanced # of pixels on +/- sides of t), 
+//		then set coord to -1.
+//
 static inline int fillFrontDirection(
     int row, 
     int col, 
@@ -463,39 +498,6 @@ static inline int fillFrontDirection(
     return vecSize;
 }
 
-// Check if any left adjacent pixel, including upper & lower left corners
-// Set return pixel coord to -1 if none is found
-static inline bool checkLeftPixel(
-	const int row,
-	const int col,
-	int& retRow,
-	int& retCol,
-	vnl_matrix<int>& front_mat)
-{
-	return true;
-}
-
-// Check if any right adjacent pixel, including upper & lower right
-static inline bool checkRightPixel(
-	const int row,
-	const int col, 
-	int& retRow,
-	int& retCol,
-	vnl_matrix<int>& front_mat)
-{
-	return true;
-}
-
-// check for direct adjacent pixel on top and bottom
-static inline bool checkTopBotPixel(
-	const int row,
-	const int col,
-	int& retRow,
-	int& retCol,
-	vnl_matrix<int>& front_mat)
-{
-	return true;
-}
-
+*/
 /////////////////////////////////////////////////////////
 
