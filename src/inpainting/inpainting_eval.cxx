@@ -232,7 +232,7 @@ bool compute_gradient(psi& PSI,
 	int patSize = PSI.sz();
     int lowestCoord[2];
     int highestCoord[2];
-	int highestDiff = -1;
+	double highestDiff = -1;
 
 	// Make copies of values
 	vnl_matrix<int> valid_mat;
@@ -245,17 +245,19 @@ bool compute_gradient(psi& PSI,
 	//grayscale_mat.transpose();
 	//unfilled_mat.transpose();
 
+    int lowCoord[2];
+    int highCoord[2];
+    int lowValue = 300;
+	int highValue = -1;
+    int pixelValue;
 	// loop through patch with sliding window
 	for (int x = 0; x < patSize - 2 * winRad; x++)
 	{
 		for (int y = 0; y < patSize - 2 * winRad; y++)
 		{
 			// Sliding window
-            int lowCoord[2];
-            int highCoord[2];
-            int lowValue = 300;
-	        int highValue = -1;
-            int pixelValue;
+            lowValue = 300;
+	        highValue = -1;
 			for (int winX = 0; winX < winSize; winX++)
 			{
 				for (int winY = 0; winY < winSize; winY++)
@@ -296,11 +298,6 @@ bool compute_gradient(psi& PSI,
         highestCoord[1] == lowestCoord[1]) 
     {  // only 1 single unfilled pixel in patch
         return false;
-    }
-    else if (highestDiff == 0) 
-    { // uniform patch, return arbitary small non-0 value
-        grad(0) = 0.01;
-        grad(1) = 0;
     }
     else
     {
