@@ -9,6 +9,7 @@
 #include "inpainting.h"
 #include "inpainting_eval.h"
 
+#include <ctime>
 
 //
 //  The Exemplar-Based Inpainting algorithm
@@ -63,6 +64,7 @@ bool inpainting::compute(int max_iterations)
 	// the fill front delta_Omega
 	iterations_done = 0;
 
+    TIMER_START;
 
 	while ((find_first_unfilled_pixel(ui, uj) == true) &&
 		   (iterations_done < max_iterations)) {
@@ -110,6 +112,18 @@ bool inpainting::compute(int max_iterations)
 
 	outdated_ = false;
 
+    time_main = TIMER_ELLAPSED;
+    vcl_cerr << "Main loop:\t" << time_main << " ms" << vcl_endl;
+    vcl_cerr << "compute_C: \t" << time_conf << " ms,\t" << count_conf << " calls,\t" <<
+        1000*time_conf/ count_conf << " us average"<< vcl_endl;
+    vcl_cerr << "compute_gradient: " << time_gradient << " ms, " << count_gradient << " calls, " <<
+        1000*time_gradient/ count_gradient << " us average"<< vcl_endl;
+    vcl_cerr << "compute_normal: " << time_normal << " ms,\t" << count_normal << " calls,\t" <<
+        1000*time_normal/ count_normal << " us average"<< vcl_endl;
+    vcl_cerr << "patchdb_lookup: " << time_lookup << " ms, " << count_lookup << " calls,\t" <<
+        time_lookup/ count_lookup << " ms average" << vcl_endl;
+
+    
 	return true;
 }
 

@@ -116,6 +116,8 @@ double compute_C(psi& PSI, const vil_image_view<double>& C,
 	///////////////////////////////////////////////////////////
 
     // Sum confidence of all pixels in the patch and divide by pixel#
+    count_conf++;
+    TIMER_START;
 
     double sum = 0.0;
     int i, j;
@@ -135,6 +137,9 @@ double compute_C(psi& PSI, const vil_image_view<double>& C,
     } while (PSI.next());
 
     double totalSize = PSI.sz() * PSI.sz();
+
+    time_conf += TIMER_ELLAPSED;
+
     return sum / totalSize;
 
 	///////////////////////////////////////////////////////////
@@ -157,7 +162,9 @@ bool compute_normal(psi& PSI,
 	///////////////////////////////////////////////////////////
 	/*	fit a 2nd-order polynomial to each of the curve's coordinate functions,
 		using weighted least squares with a Gaussian weight function */
-	
+    count_normal++;
+    TIMER_START;
+
     int winRad = PSI.w();
 
     if (winRad <= 0)
@@ -198,7 +205,7 @@ bool compute_normal(psi& PSI,
 	weight_mat(2, 2) = weight_mat(0, 0);
 	
     
-
+    time_normal += TIMER_ELLAPSED;
     return true;
 
 	///////////////////////////////////////////////////////////
@@ -225,6 +232,9 @@ bool compute_gradient(psi& PSI,
 	// Use a sliding 3x3 pixel window
 	// get max/min pixel to calculate gradient direction & magnitude
 	
+    count_gradient++;
+    TIMER_START;
+
 	if (PSI.w() == 0) return false;
 
 	int winRad = 1;
@@ -313,6 +323,8 @@ bool compute_gradient(psi& PSI,
         grad(0) = highestDiff * cos(theta);
         grad(1) = highestDiff * sin(theta);
     }
+
+    time_gradient += TIMER_ELLAPSED;
 	return true;
 
 	///////////////////////////////////////////////////////////

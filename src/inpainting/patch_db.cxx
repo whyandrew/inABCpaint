@@ -83,6 +83,10 @@ bool patch_db::lookup(
 			int& source_j
 			)
 {
+
+    count_lookup++;
+    TIMER_START;
+
 	int i, match;
 
 	// if the data structures were not correctly initialized, 
@@ -126,20 +130,22 @@ bool patch_db::lookup(
         baseCoord[0] = patch_center_coords_(indexPatch, 0) - w_ ;
         baseCoord[1] = patch_center_coords_(indexPatch, 1) - w_ ;
         // for each pixel of patch. 
-        for (int iRow = 0; iRow < matSize; iRow++)
+        for (int iRow = 0; iRow < matSize && patchSSD < bestSSD; iRow++)
         {
-            for (int iCol = 0; iCol < matSize ; iCol++)
+            for (int iCol = 0; iCol < matSize && patchSSD < bestSSD; iCol++)
             {
                 // Ignore unfilled pixel or if patchSSD is already too much
-                if (!target_unfilled(iRow, iCol) && patchSSD < bestSSD)
+                if (!target_unfilled(iRow, iCol)/* && patchSSD < bestSSD*/)
                 {
                     pixelCoord[0] = baseCoord[0] + iRow;
                     pixelCoord[1] = baseCoord[1] + iCol;
                     // Calculate sum of squared diff for each channel
                     patchSSD += pow((target_planes[0](iRow, iCol) - 
                             im_(pixelCoord[0], pixelCoord[1]).r), 2);
+                    if (patchSSD >= bestSSD) break;
                     patchSSD += pow((target_planes[1](iRow, iCol) - 
                             im_(pixelCoord[0], pixelCoord[1]).g), 2);
+                    if (patchSSD >= bestSSD) break;
                     patchSSD += pow((target_planes[2](iRow, iCol) - 
                             im_(pixelCoord[0], pixelCoord[1]).b), 2);
                 }
@@ -152,6 +158,8 @@ bool patch_db::lookup(
             bestSSD = patchSSD;
             match = indexPatch;            
         }
+        //else
+         //   indexPatch += 9 ;
 
     }
 
@@ -164,6 +172,7 @@ bool patch_db::lookup(
 	source_i = patch_center_coords_(match,0);
 	source_j = patch_center_coords_(match,1);
 
+    time_lookup += TIMER_ELLAPSED;
 	return true;
 }
 

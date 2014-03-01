@@ -36,3 +36,23 @@
 #include <vnl/vnl_double_2.h>
 #include <vnl/algo/vnl_matrix_inverse.h>
 #include <vnl/vnl_rational.h>
+
+#include <ctime>
+
+#ifndef TIMER_H
+#define TIMER_H
+
+#define TIMER_START     std::clock_t start_time;	start_time = std::clock()
+#define TIMER_ELLAPSED  std::clock() - start_time
+
+    extern std::clock_t time_main;
+    extern std::clock_t time_gradient;
+    extern std::clock_t time_lookup;
+    extern std::clock_t time_normal;
+    extern std::clock_t time_conf;
+    extern unsigned int count_gradient;
+    extern unsigned int count_normal;
+    extern unsigned int count_conf;
+    extern unsigned int count_lookup;
+
+#endif

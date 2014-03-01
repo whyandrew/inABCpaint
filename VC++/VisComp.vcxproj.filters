@@ -75,6 +75,9 @@
     <ClCompile Include="..\src\VisCompUI.cxx">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\inpainting\timer.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\file_callbacks\callback_open_drawing.h">

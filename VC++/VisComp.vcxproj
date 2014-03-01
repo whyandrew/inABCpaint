@@ -148,6 +148,7 @@
     <ClCompile Include="..\src\inpainting\inpainting_debug.cxx" />
     <ClCompile Include="..\src\inpainting\inpainting_eval.cxx" />
     <ClCompile Include="..\src\file\load_image.cxx" />
+    <ClCompile Include="..\src\inpainting\timer.cxx" />
     <ClCompile Include="..\src\main.cxx" />
     <ClCompile Include="..\src\matting\matting.cxx" />
     <ClCompile Include="..\src\matting\matting_algorithm.cxx" />
