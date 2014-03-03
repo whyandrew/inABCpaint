@@ -112,8 +112,10 @@ bool inpainting::compute(int max_iterations)
 
 	outdated_ = false;
 
-    time_main = TIMER_ELLAPSED;
-    vcl_cerr << "Main loop:\t" << time_main << " ms" << vcl_endl;
+    time_compute += TIMER_ELLAPSED;
+
+ 
+    vcl_cerr << "Compoute loop:\t" << time_compute << " ms" << vcl_endl;
     vcl_cerr << "compute_C: \t" << time_conf << " ms,\t" << count_conf << " calls,\t" <<
         1000*time_conf/ count_conf << " us average"<< vcl_endl;
     vcl_cerr << "compute_gradient: " << time_gradient << " ms, " << count_gradient << " calls, " <<

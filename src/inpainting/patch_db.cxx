@@ -142,10 +142,12 @@ bool patch_db::lookup(
                     // Calculate sum of squared diff for each channel
                     patchSSD += pow((target_planes[0](iRow, iCol) - 
                             im_(pixelCoord[0], pixelCoord[1]).r), 2);
-                    if (patchSSD >= bestSSD) break;
+                    if (patchSSD >= bestSSD) 
+                        break;
                     patchSSD += pow((target_planes[1](iRow, iCol) - 
                             im_(pixelCoord[0], pixelCoord[1]).g), 2);
-                    if (patchSSD >= bestSSD) break;
+                    if (patchSSD >= bestSSD) 
+                        break;
                     patchSSD += pow((target_planes[2](iRow, iCol) - 
                             im_(pixelCoord[0], pixelCoord[1]).b), 2);
                 }
@@ -159,7 +161,7 @@ bool patch_db::lookup(
             match = indexPatch;            
         }
         //else
-         //   indexPatch += 9 ;
+        //    indexPatch += 9 ;
 
     }
 
