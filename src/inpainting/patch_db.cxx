@@ -158,10 +158,12 @@ bool patch_db::lookup(
         if (patchSSD < bestSSD)
         {
             bestSSD = patchSSD;
-            match = indexPatch;            
+            match = indexPatch;       
+            if (indexPatch >2)
+                indexPatch -= 2;
         }
-        //else
-        //    indexPatch += 9 ;
+        else
+            indexPatch += (2*matSize) ;
 
     }
 
