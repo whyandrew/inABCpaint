@@ -1,0 +1,108 @@
+-------------------------------------
+Assignment 2 Checklist/Grading sheet
+-------------------------------------
+
+Name: Andrew Wong 
+Student ID: 999369507
+
+--------------------------------------------------------------------------------
+A. PLEASE ANSWER THE FOLLOWING QUESTIONS
+
+  
+1. I verify that I completed this assignment according to the 
+   Academic Honesty policy stated in 
+   http://www.cs.toronto.edu/~kyros/courses/320/policy.2013s.html
+
+   _x__Yes   ___No
+
+
+2. I collaborated on this assignment with another student 
+   (see http://www.cs.toronto.edu/~kyros/courses/320/policy.2013s.html for
+    policy on assignments done in collaboration)
+
+   ___Yes   _x__No
+
+   If you checked yes, please supply the following
+
+       Student name: 
+       Portion(s) of assignment completed by that student (see checklist below)
+
+
+--------------------------------------------------------------------------------
+B. PLACE AN (X) IN FRONT OF PORTIONS OF THE ASSIGNMENT THAT YOU COMPLETED IN FULL.
+   
+   If a portion of the assignment was not completed fully, please provide 
+   additional information so that we can determine whether or not you are eligible
+   for partial credit. THE MORE INFORMATION YOU SUPPLY (EG. FILE WHICH CONTAINS
+   PARTIAL CODE, SUGGESTIONS ON WHERE AND WHAT TO LOOK FOR IN YOUR PARTIAL 
+   IMPLEMENTATION, DETAILED COMMENTS IN YOUR CODE, ETC) THE MORE LIKELY IT IS 
+   WE WILL BE ABLE TO MAKE AN ACCURATE ASSESSMENT
+
+   
+x___   (15 points) Part A     patch_db.lookup() method 
+                  
+x___   (10 points) Part A     compute_C() method
+
+_x__   (20 points) Part A     compute_gradient() method
+
+I had very simple approximation that is commented out.
+On some cases it actually works better than the Sobel operator currently used.
+
+_x__   (25 points) Part A     compute_normal() method
+                  
+_x__   (10 points) Part B.1  
+
+__x_   ( 5 points) Part B.2   Question 1
+
+___   (15 points) Part B.2   Question 2
+
+-------------------------------------------------------------------------------- 
+
+C. IF YOU ARE MAKING A CLAIM FOR EXTRA-CREDIT POINTS (Part B.3)
+   PROVIDE DETAILS HERE
+
+
+	**************
+   The slowest part of the algo is the patchdb::lookup method.
+   Each call to it takes ~100ms on my own desktop computer.
+   Of the ~32sec total run-time using the "input" provided, close to 30 sec
+   is used by the lookup method.
+
+   A very simple way to modify it compare to the "standard" of looping
+   thru all patches:
+
+   When a patch SSD (sum of sqaured differences) is HIGHER than the current best,
+   jump ahead several patches (currently set to the number of patch width).
+   When a patch SSD is LOWER than the current best,
+   RETRACE back by 1, in case the previous patch may even be better.
+
+   Overall, this does not seem to affect visual quality, compared to my own without
+   using it. Of course quality will vary depending on the picture & mask.
+
+   Using the precompiled full implemntation provided, the "input" picture
+   takes ~28sec to inpaint. So my original implmentation is similar at ~32sec.
+
+   With this simple patch-jumping based on SSD, the run-time is only ~7 sec!!
+   And it's only 2 lines of code. It is already included in the submission in PartA.
+
+   ******
+
+   A second idea which I DID NOT implement, since mid-term is in 3 days:
+
+   The way the current algo re-compute gradient & normal is very inefficient.
+   Every single iteration, the priority queue containing the patches is completely
+   re-constructed.
+   Using the "input" picture, compute_gradient and compute_normal functions are
+   each called well over 180,000 times! The first iteration alone called these 2
+   functions over 700 times each.
+
+   Idea:
+   Have two binary search trees both storing the same fill_front patches.
+   One sorts them by priority, another one sorts them by image coordinates.
+   So when a patch is inpainted, simply do BST-search using coordinate.
+    which you can get priority info from the the fill_front patch as well.
+   Remove it  and its surrounding fill_front patch from both BSTs.
+   Then re-calculate priority (gradient & normal), and reinsert them into BSTs.
+   This should decrease the calls to compute gradient/normal by hundreds per iteration.
+
+

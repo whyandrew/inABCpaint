@@ -83,10 +83,6 @@ bool patch_db::lookup(
 			int& source_j
 			)
 {
-
-    count_lookup++;
-    TIMER_START;
-
 	int i, match;
 
 	// if the data structures were not correctly initialized, 
@@ -158,13 +154,12 @@ bool patch_db::lookup(
         if (patchSSD < bestSSD)
         {
             bestSSD = patchSSD;
-            match = indexPatch;       
-            if (indexPatch >2)
+            match = indexPatch; 
+            if (indexPatch > 2)
                 indexPatch -= 2;
         }
         else
-            indexPatch += (2*matSize) ;
-
+            indexPatch += (matSize);
     }
 
 	///////////////////////////////////////////////////////////
@@ -176,7 +171,6 @@ bool patch_db::lookup(
 	source_i = patch_center_coords_(match,0);
 	source_j = patch_center_coords_(match,1);
 
-    time_lookup += TIMER_ELLAPSED;
 	return true;
 }
 

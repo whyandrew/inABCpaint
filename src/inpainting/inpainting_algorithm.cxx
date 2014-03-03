@@ -64,7 +64,6 @@ bool inpainting::compute(int max_iterations)
 	// the fill front delta_Omega
 	iterations_done = 0;
 
-    TIMER_START;
 
 	while ((find_first_unfilled_pixel(ui, uj) == true) &&
 		   (iterations_done < max_iterations)) {
@@ -112,9 +111,7 @@ bool inpainting::compute(int max_iterations)
 
 	outdated_ = false;
 
-    time_compute += TIMER_ELLAPSED;
-
- 
+    /*
     vcl_cerr << "Compoute loop:\t" << time_compute << " ms" << vcl_endl;
     vcl_cerr << "compute_C: \t" << time_conf << " ms,\t" << count_conf << " calls,\t" <<
         1000*time_conf/ count_conf << " us average"<< vcl_endl;
@@ -124,7 +121,7 @@ bool inpainting::compute(int max_iterations)
         1000*time_normal/ count_normal << " us average"<< vcl_endl;
     vcl_cerr << "patchdb_lookup: " << time_lookup << " ms, " << count_lookup << " calls,\t" <<
         time_lookup/ count_lookup << " ms average" << vcl_endl;
-
+    */
     
 	return true;
 }
