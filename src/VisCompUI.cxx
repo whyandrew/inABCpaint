@@ -326,6 +326,94 @@ void VisCompUI::cb_Mask1(Fl_Menu_* o, void* v) {
   ((VisCompUI*)(o->parent()->user_data()))->cb_Mask1_i(o,v);
 }
 
+void VisCompUI::cb_source0_i(Fl_Menu_*, void*) {
+  // load an image interactively and store it as the Background 1 image
+// and, if successful, show it in the left panel
+load_and_display_blending_image(left_panel, B->Source0);
+}
+void VisCompUI::cb_source0(Fl_Menu_* o, void* v) {
+  ((VisCompUI*)(o->parent()->user_data()))->cb_source0_i(o,v);
+}
+
+void VisCompUI::cb_source1_i(Fl_Menu_*, void*) {
+  // load an image interactively and store it as the Background 1 image
+// and, if successful, show it in the left panel
+load_and_display_blending_image(right_panel, B->Source1);
+}
+void VisCompUI::cb_source1(Fl_Menu_* o, void* v) {
+  ((VisCompUI*)(o->parent()->user_data()))->cb_source1_i(o,v);
+}
+
+void VisCompUI::cb_mask2_i(Fl_Menu_*, void*) {
+  // load an image interactively and store it as the Background 2 image
+// and, if successful, show it in the right panel
+load_and_display_blending_image1(right_panel, B->Mask);
+}
+void VisCompUI::cb_mask2(Fl_Menu_* o, void* v) {
+  ((VisCompUI*)(o->parent()->user_data()))->cb_mask2_i(o,v);
+}
+
+void VisCompUI::cb_blended_i(Fl_Menu_*, void*) {
+  {
+      char* fname;
+      bool ok = false;
+      fname = fl_file_chooser(B->get_title(B->Blend).c_str(), "", "");
+      if (fname != NULL) {
+            if (B->save_blended(fname) == false)
+                  fl_alert("blending::save_blended(): blended image not available.");
+      } 
+};
+}
+void VisCompUI::cb_blended(Fl_Menu_* o, void* v) {
+  ((VisCompUI*)(o->parent()->user_data()))->cb_blended_i(o,v);
+}
+
+void VisCompUI::cb_Run2_i(Fl_Menu_*, void*) {
+  {
+	if (B->compute() == false)
+		fl_alert("Blending cannot be performed yet.");
+        mainWindow->redraw();
+};
+}
+void VisCompUI::cb_Run2(Fl_Menu_* o, void* v) {
+  ((VisCompUI*)(o->parent()->user_data()))->cb_Run2_i(o,v);
+}
+
+void VisCompUI::cb_Increase_i(Fl_Menu_*, void*) {
+  B->change_level(1);
+}
+void VisCompUI::cb_Increase(Fl_Menu_* o, void* v) {
+  ((VisCompUI*)(o->parent()->user_data()))->cb_Increase_i(o,v);
+}
+
+void VisCompUI::cb_Decrease_i(Fl_Menu_*, void*) {
+  B->change_level(-1);
+}
+void VisCompUI::cb_Decrease(Fl_Menu_* o, void* v) {
+  ((VisCompUI*)(o->parent()->user_data()))->cb_Decrease_i(o,v);
+}
+
+void VisCompUI::cb_Toggle_i(Fl_Menu_*, void*) {
+  B->toggle_view();
+}
+void VisCompUI::cb_Toggle(Fl_Menu_* o, void* v) {
+  ((VisCompUI*)(o->parent()->user_data()))->cb_Toggle_i(o,v);
+}
+
+void VisCompUI::cb_Toggle1_i(Fl_Menu_*, void*) {
+  B->toggle_view_mode();
+}
+void VisCompUI::cb_Toggle1(Fl_Menu_* o, void* v) {
+  ((VisCompUI*)(o->parent()->user_data()))->cb_Toggle1_i(o,v);
+}
+
+void VisCompUI::cb_Toggle2_i(Fl_Menu_*, void*) {
+  B->toggle_packed();
+}
+void VisCompUI::cb_Toggle2(Fl_Menu_* o, void* v) {
+  ((VisCompUI*)(o->parent()->user_data()))->cb_Toggle2_i(o,v);
+}
+
 Fl_Menu_Item VisCompUI::menu_Main[] = {
  {"File", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
  {"Open Left Image", 0,  (Fl_Callback*)VisCompUI::cb_Open, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -347,23 +435,39 @@ Fl_Menu_Item VisCompUI::menu_Main[] = {
  {"Create Composite", 0,  (Fl_Callback*)VisCompUI::cb_Create, 0, 128, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0},
  {"Inpainting", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
- {"Display Control", 0x40064,  (Fl_Callback*)VisCompUI::cb_Display1, 0, 128, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Display Control", 0,  (Fl_Callback*)VisCompUI::cb_Display1, 0, 128, FL_NORMAL_LABEL, 0, 14, 0},
  {"Load", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
- {"source", 0x80073,  (Fl_Callback*)VisCompUI::cb_source, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"mask", 0x80064,  (Fl_Callback*)VisCompUI::cb_mask, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"source", 0,  (Fl_Callback*)VisCompUI::cb_source, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"mask", 0,  (Fl_Callback*)VisCompUI::cb_mask, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0},
  {"Save", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
- {"inpainted", 0x80069,  (Fl_Callback*)VisCompUI::cb_inpainted, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"mask", 0x8006d,  (Fl_Callback*)VisCompUI::cb_mask1, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"inpainted", 0,  (Fl_Callback*)VisCompUI::cb_inpainted, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"mask", 0,  (Fl_Callback*)VisCompUI::cb_mask1, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0},
  {"Transfer", 0,  0, 0, 192, FL_NORMAL_LABEL, 0, 14, 0},
- {"Inpainted -> Source", 0x40069,  (Fl_Callback*)VisCompUI::cb_Inpainted, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"Drawing -> Initial Mask", 0x4006d,  (Fl_Callback*)VisCompUI::cb_Drawing, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Inpainted -> Source", 0,  (Fl_Callback*)VisCompUI::cb_Inpainted, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Drawing -> Initial Mask", 0,  (Fl_Callback*)VisCompUI::cb_Drawing, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0},
- {"Run Algorithm", 0x80072,  (Fl_Callback*)VisCompUI::cb_Run1, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"Step Algorithm", 0x8006e,  (Fl_Callback*)VisCompUI::cb_Step, 0, 128, FL_NORMAL_LABEL, 0, 14, 0},
- {"Mask Undo", 0x4007a,  (Fl_Callback*)VisCompUI::cb_Mask, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"Mask Clear ", 0x40063,  (Fl_Callback*)VisCompUI::cb_Mask1, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Run Algorithm", 0,  (Fl_Callback*)VisCompUI::cb_Run1, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Step Algorithm", 0,  (Fl_Callback*)VisCompUI::cb_Step, 0, 128, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Mask Undo", 0,  (Fl_Callback*)VisCompUI::cb_Mask, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Mask Clear ", 0,  (Fl_Callback*)VisCompUI::cb_Mask1, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {0,0,0,0,0,0,0,0,0},
+ {"Blending", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Load", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
+ {"source0", 0,  (Fl_Callback*)VisCompUI::cb_source0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"source1", 0,  (Fl_Callback*)VisCompUI::cb_source1, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"mask", 0,  (Fl_Callback*)VisCompUI::cb_mask2, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {0,0,0,0,0,0,0,0,0},
+ {"Save", 0,  0, 0, 192, FL_NORMAL_LABEL, 0, 14, 0},
+ {"blended", 0,  (Fl_Callback*)VisCompUI::cb_blended, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {0,0,0,0,0,0,0,0,0},
+ {"Run Algorithm", 0,  (Fl_Callback*)VisCompUI::cb_Run2, 0, 128, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Increase level", 0x2b,  (Fl_Callback*)VisCompUI::cb_Increase, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Decrease level", 0x2d,  (Fl_Callback*)VisCompUI::cb_Decrease, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Toggle Gauss/Laplacian", 0x67,  (Fl_Callback*)VisCompUI::cb_Toggle, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Toggle Images", 0x69,  (Fl_Callback*)VisCompUI::cb_Toggle1, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Toggle Packed", 0x70,  (Fl_Callback*)VisCompUI::cb_Toggle2, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0},
  {0,0,0,0,0,0,0,0,0}
 };
@@ -571,30 +675,25 @@ Fl_Menu_Item VisCompUI::menu_Left[] = {
  {0,0,0,0,0,0,0,0,0}
 };
 
-Fl_Menu_Item VisCompUI::menu_Right[] = {
- {"  ", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {0,0,0,0,0,0,0,0,0}
-};
-
-void VisCompUI::cb_source1_i(Fl_Menu_*, void*) {
+void VisCompUI::cb_source2_i(Fl_Menu_*, void*) {
   // display the image in a panel of the UI
 // the function below is defined in fluid
 display_inpainting_image(left_panel, I->Source);
 I->debug_display_left(I->Source);
 }
-void VisCompUI::cb_source1(Fl_Menu_* o, void* v) {
-  ((VisCompUI*)(o->parent()->user_data()))->cb_source1_i(o,v);
+void VisCompUI::cb_source2(Fl_Menu_* o, void* v) {
+  ((VisCompUI*)(o->parent()->user_data()))->cb_source2_i(o,v);
 }
 
-void VisCompUI::cb_mask2_i(Fl_Menu_*, void*) {
+void VisCompUI::cb_mask3_i(Fl_Menu_*, void*) {
   // display the image in a panel of the UI
 // the function below is defined in fluid
 // this function is used for displaying 1-band images 
 display_inpainting_image1(left_panel, I->Init_Filled);
 I->debug_display_left(I->Init_Filled);
 }
-void VisCompUI::cb_mask2(Fl_Menu_* o, void* v) {
-  ((VisCompUI*)(o->parent()->user_data()))->cb_mask2_i(o,v);
+void VisCompUI::cb_mask3(Fl_Menu_* o, void* v) {
+  ((VisCompUI*)(o->parent()->user_data()))->cb_mask3_i(o,v);
 }
 
 void VisCompUI::cb_fill_i(Fl_Menu_*, void*) {
@@ -642,8 +741,8 @@ void VisCompUI::cb_inpainted1(Fl_Menu_* o, void* v) {
 
 Fl_Menu_Item VisCompUI::menu_Left1[] = {
  {"  ", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"source", 0,  (Fl_Callback*)VisCompUI::cb_source1, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"mask", 0,  (Fl_Callback*)VisCompUI::cb_mask2, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"source", 0,  (Fl_Callback*)VisCompUI::cb_source2, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"mask", 0,  (Fl_Callback*)VisCompUI::cb_mask3, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"fill front", 0,  (Fl_Callback*)VisCompUI::cb_fill, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"unfilled", 0,  (Fl_Callback*)VisCompUI::cb_unfilled, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"confidence", 0,  (Fl_Callback*)VisCompUI::cb_confidence, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -651,25 +750,25 @@ Fl_Menu_Item VisCompUI::menu_Left1[] = {
  {0,0,0,0,0,0,0,0,0}
 };
 
-void VisCompUI::cb_source2_i(Fl_Menu_*, void*) {
+void VisCompUI::cb_source3_i(Fl_Menu_*, void*) {
   // display the image in a panel of the UI
 // the function below is defined in fluid
 display_inpainting_image(right_panel, I->Source);
 I->debug_display_right(I->Source);
 }
-void VisCompUI::cb_source2(Fl_Menu_* o, void* v) {
-  ((VisCompUI*)(o->parent()->user_data()))->cb_source2_i(o,v);
+void VisCompUI::cb_source3(Fl_Menu_* o, void* v) {
+  ((VisCompUI*)(o->parent()->user_data()))->cb_source3_i(o,v);
 }
 
-void VisCompUI::cb_mask3_i(Fl_Menu_*, void*) {
+void VisCompUI::cb_mask4_i(Fl_Menu_*, void*) {
   // display the image in a panel of the UI
 // the function below is defined in fluid
 // this function is used for displaying 1-band images 
 display_inpainting_image1(right_panel, I->Init_Filled);
 I->debug_display_right(I->Init_Filled);
 }
-void VisCompUI::cb_mask3(Fl_Menu_* o, void* v) {
-  ((VisCompUI*)(o->parent()->user_data()))->cb_mask3_i(o,v);
+void VisCompUI::cb_mask4(Fl_Menu_* o, void* v) {
+  ((VisCompUI*)(o->parent()->user_data()))->cb_mask4_i(o,v);
 }
 
 void VisCompUI::cb_fill1_i(Fl_Menu_*, void*) {
@@ -715,10 +814,10 @@ void VisCompUI::cb_inpainted2(Fl_Menu_* o, void* v) {
   ((VisCompUI*)(o->parent()->user_data()))->cb_inpainted2_i(o,v);
 }
 
-Fl_Menu_Item VisCompUI::menu_Right1[] = {
+Fl_Menu_Item VisCompUI::menu_Right[] = {
  {"  ", 0,  0, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"source", 0,  (Fl_Callback*)VisCompUI::cb_source2, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
- {"mask", 0,  (Fl_Callback*)VisCompUI::cb_mask3, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"source", 0,  (Fl_Callback*)VisCompUI::cb_source3, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"mask", 0,  (Fl_Callback*)VisCompUI::cb_mask4, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"fill front", 0,  (Fl_Callback*)VisCompUI::cb_fill1, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"unfilled", 0,  (Fl_Callback*)VisCompUI::cb_unfilled1, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"confidence", 0,  (Fl_Callback*)VisCompUI::cb_confidence1, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -813,6 +912,10 @@ vil_image_view<vxl_byte> VisCompUI::interactive_load_image1(vcl_string title) {
   return im;
 }
 
+void VisCompUI::set_blending(blending* b) {
+  B = b;
+}
+
 void VisCompUI::set_matting(matting m) {
   M = m;
 }
@@ -893,7 +996,22 @@ void VisCompUI::load_and_display_inpainting_image1(ImDraw* panel, inpainting::im
   	fl_alert("VisCompUI::load_and_display_inpainting_image1(): Image load failed.");
 }
 
+void VisCompUI::load_and_display_blending_image(ImDraw* panel, blending::im_type imt) {
+  // load an image interactively and store it in the blending data structure
+  // as specified by the "image type" parameter imt
+  if (B->set(imt, interactive_load_image(B->get_title(imt))) == false)  
+  	fl_alert("VisCompUI::load_and_display_blending_image(): Image load failed.");
+}
+
+void VisCompUI::load_and_display_blending_image1(ImDraw* panel, blending::im_type imt) {
+  // load a 1-band image interactively and store it in the blending data structure
+  // as specified by the "image type" parameter imt
+  if (B->set(imt, interactive_load_image1(B->get_title(imt))) == false)
+        fl_alert("VisCompUI::load_and_display_blending_image1(): Image load failed.");
+}
+
 VisCompUI::VisCompUI() {
+  inpainting_iterations_per_step = 1;
   { mainWindow = new Fl_Double_Window(850, 505, "Visual Computing User Interface");
     mainWindow->user_data((void*)(this));
     { Fl_Group* o = new Fl_Group(0, 1, 850, 25);
@@ -943,6 +1061,27 @@ VisCompUI::VisCompUI() {
       { Fl_Menu_Item* o = &menu_Main[27];
         o->label(I->get_title(I->Init_Filled).c_str());
       }
+      { Fl_Menu_Item* o = &menu_Main[40];
+        /* this snippet of code allows the menu item to have a variable appearance */
+        /* in the actual UI, the menu item's label will be the string returned by the get_title() method */
+        /* see the file blending.cxx for definitions of these labels */
+        o->label(B->get_title(B->Source0).c_str());
+      }
+      { Fl_Menu_Item* o = &menu_Main[41];
+        /* this snippet of code allows the menu item to have a variable appearance */
+        /* in the actual UI, the menu item's label will be the string returned by the get_title() method */
+        /* see the file inpainting.cxx for definitions of these labels */
+        o->label(B->get_title(B->Source1).c_str());
+      }
+      { Fl_Menu_Item* o = &menu_Main[42];
+        /* this snippet of code allows the menu item to have a variable appearance */
+        /* in the actual UI, the menu item's label will be the string returned by the get_title() method*/
+        /* see the file inpainting.cxx for definitions of these labels */
+        o->label(B->get_title(B->Mask).c_str());
+      }
+      { Fl_Menu_Item* o = &menu_Main[45];
+        o->label(B->get_title(B->Blend).c_str());
+      }
       o->menu(menu_Main);
     } // Fl_Menu_Bar* o
     { Fl_Choice* o = new Fl_Choice(5, 35, 105, 25, "Mode Selection");
@@ -954,7 +1093,8 @@ VisCompUI::VisCompUI() {
     { Fl_Group* o = new Fl_Group(115, 35, 360, 455);
       { left_panel = new ImDraw(115, 60, 360, 360);
         left_panel->tooltip("Browse mode: left-click recenters image\r\nDraw mode: left-drag draws rectang\
-le");
+le\r\nMorph mode: left-drag draws new line in both panels, right-drag moves cl\
+osest line endpoint in panel containing mouse");
         left_panel->box(FL_NO_BOX);
         left_panel->color(FL_BACKGROUND_COLOR);
         left_panel->selection_color(FL_BACKGROUND_COLOR);
@@ -1135,15 +1275,8 @@ le");
       }
       o->menu(menu_Left);
     } // Fl_Choice* o
-    { Fl_Choice* o = new Fl_Choice(165, 20, 150, 25, "Right  Image");
-      o->tooltip("Choose the operating mode of the user interface");
-      o->down_box(FL_BORDER_BOX);
-      o->align(Fl_Align(FL_ALIGN_TOP_LEFT));
-      o->menu(menu_Right);
-    } // Fl_Choice* o
     mattingDisplayWindow->end();
   } // Fl_Double_Window* mattingDisplayWindow
-  inpainting_iterations_per_step = 1;
   { inpaintingDisplayWindow = new Fl_Double_Window(320, 146, "Inpainting Control");
     inpaintingDisplayWindow->user_data((void*)(this));
     { Fl_Choice* o = new Fl_Choice(5, 20, 150, 25, "Left Image");
@@ -1192,43 +1325,43 @@ le");
       o->tooltip("Choose the image to display in the right panel");
       o->down_box(FL_BORDER_BOX);
       o->align(Fl_Align(FL_ALIGN_TOP_LEFT));
-      { Fl_Menu_Item* o = &menu_Right1[1];
+      { Fl_Menu_Item* o = &menu_Right[1];
         /* this snippet of code allows the menu item to have a variable appearance */
         /* in the actual UI, the menu item's label will be the string returned by the get_title() method*/
         /* see the file inpainting.cxx for definitions of these labels */
         o->label(I->get_title(I->Source).c_str());
       }
-      { Fl_Menu_Item* o = &menu_Right1[2];
+      { Fl_Menu_Item* o = &menu_Right[2];
         /* this snippet of code allows the menu item to have a variable appearance */
         /* in the actual UI, the menu item's label will be the string returned by the get_title() method*/
         /* see the file inpainting.cxx for definitions of these labels */
         o->label(I->get_title(I->Init_Filled).c_str());
       }
-      { Fl_Menu_Item* o = &menu_Right1[3];
+      { Fl_Menu_Item* o = &menu_Right[3];
         /* this snippet of code allows the menu item to have a variable appearance */
         /* in the actual UI, the menu item's label will be the string returned by the get_title() method*/
         /* see the file inpainting.cxx for definitions of these labels */
         o->label(I->get_title(I->Fill_Front).c_str());
       }
-      { Fl_Menu_Item* o = &menu_Right1[4];
+      { Fl_Menu_Item* o = &menu_Right[4];
         /* this snippet of code allows the menu item to have a variable appearance */
         /* in the actual UI, the menu item's label will be the string returned by the get_title() method*/
         /* see the file inpainting.cxx for definitions of these labels */
         o->label(I->get_title(I->Unfilled).c_str());
       }
-      { Fl_Menu_Item* o = &menu_Right1[5];
+      { Fl_Menu_Item* o = &menu_Right[5];
         /* this snippet of code allows the menu item to have a variable appearance */
         /* in the actual UI, the menu item's label will be the string returned by the get_title() method*/
         /* see the file inpainting.cxx for definitions of these labels */
         o->label(I->get_title(I->Confidence).c_str());
       }
-      { Fl_Menu_Item* o = &menu_Right1[6];
+      { Fl_Menu_Item* o = &menu_Right[6];
         /* this snippet of code allows the menu item to have a variable appearance */
         /* in the actual UI, the menu item's label will be the string returned by the get_title() method*/
         /* see the file inpainting.cxx for definitions of these labels */
         o->label(I->get_title(I->Inpainted).c_str());
       }
-      o->menu(menu_Right1);
+      o->menu(menu_Right);
     } // Fl_Choice* o
     { Fl_Input* o = new Fl_Input(5, 65, 150, 25, "Iterations Per Run");
       o->tooltip("How many iterations should be run each time \"Run Algorithm\" is selected fro\

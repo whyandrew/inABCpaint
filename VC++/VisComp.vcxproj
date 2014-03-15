@@ -156,6 +156,8 @@
     <ClCompile Include="..\src\inpainting\psi.cxx" />
     <ClCompile Include="..\src\imdraw\read_drawing.cxx" />
     <ClCompile Include="..\src\gl\Texture.cxx" />
+    <ClCompile Include="..\src\pyramid\blend.cxx" />
+    <ClCompile Include="..\src\pyramid\pyramid.cxx" />
     <ClCompile Include="..\src\vil_trace_8con_boundary.cxx" />
     <ClCompile Include="..\src\VisCompUI.cxx" />
   </ItemGroup>
@@ -173,6 +175,7 @@
     <ClInclude Include="..\src\matting\matting.h" />
     <ClInclude Include="..\src\inpainting\psi.h" />
     <ClInclude Include="..\src\gl\Texture.h" />
+    <ClInclude Include="..\src\pyramid\pyramid.h" />
     <ClInclude Include="..\src\vil_trace_8con_boundary.h" />
     <ClInclude Include="..\src\VisCompUI.h" />
     <ClInclude Include="..\src\vxl_includes.h" />

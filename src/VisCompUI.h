@@ -7,6 +7,7 @@
 #include "matting/matting.h"
 #include "vxl_includes.h"
 #include "inpainting/inpainting.h"
+#include "pyramid/pyramid.h"
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Menu_Bar.H>
 #include "file/load_image.h"
@@ -25,10 +26,12 @@ class VisCompUI {
   matting M; 
   int inpainting_iterations_per_step; 
   inpainting *I; 
+  blending *B; 
 public:
   void show();
   vil_image_view<vil_rgb<vxl_byte> > interactive_load_image(vcl_string title);
   vil_image_view<vxl_byte> interactive_load_image1(vcl_string title);
+  void set_blending(blending* b);
   void set_matting(matting m);
   void display_matting_image(ImDraw* panel, matting::im_type imt);
   void display_matting_image1(ImDraw* panel, matting::im_type imt);
@@ -38,6 +41,8 @@ public:
   void display_inpainting_image1(ImDraw* panel, inpainting::im_type imt);
   void load_and_display_inpainting_image(ImDraw* panel, inpainting::im_type imt);
   void load_and_display_inpainting_image1(ImDraw* panel, inpainting::im_type imt);
+  void load_and_display_blending_image(ImDraw* panel, blending::im_type imt);
+  void load_and_display_blending_image1(ImDraw* panel, blending::im_type imt);
   VisCompUI();
   Fl_Double_Window *mainWindow;
   static Fl_Menu_Item menu_Main[];
@@ -90,6 +95,26 @@ private:
   static void cb_Mask(Fl_Menu_*, void*);
   void cb_Mask1_i(Fl_Menu_*, void*);
   static void cb_Mask1(Fl_Menu_*, void*);
+  void cb_source0_i(Fl_Menu_*, void*);
+  static void cb_source0(Fl_Menu_*, void*);
+  void cb_source1_i(Fl_Menu_*, void*);
+  static void cb_source1(Fl_Menu_*, void*);
+  void cb_mask2_i(Fl_Menu_*, void*);
+  static void cb_mask2(Fl_Menu_*, void*);
+  void cb_blended_i(Fl_Menu_*, void*);
+  static void cb_blended(Fl_Menu_*, void*);
+  void cb_Run2_i(Fl_Menu_*, void*);
+  static void cb_Run2(Fl_Menu_*, void*);
+  void cb_Increase_i(Fl_Menu_*, void*);
+  static void cb_Increase(Fl_Menu_*, void*);
+  void cb_Decrease_i(Fl_Menu_*, void*);
+  static void cb_Decrease(Fl_Menu_*, void*);
+  void cb_Toggle_i(Fl_Menu_*, void*);
+  static void cb_Toggle(Fl_Menu_*, void*);
+  void cb_Toggle1_i(Fl_Menu_*, void*);
+  static void cb_Toggle1(Fl_Menu_*, void*);
+  void cb_Toggle2_i(Fl_Menu_*, void*);
+  static void cb_Toggle2(Fl_Menu_*, void*);
   static Fl_Menu_Item menu_Mode[];
   void cb_Browse_i(Fl_Menu_*, void*);
   static void cb_Browse(Fl_Menu_*, void*);
@@ -163,15 +188,14 @@ private:
   static void cb_nback(Fl_Menu_*, void*);
   void cb_ncomp_i(Fl_Menu_*, void*);
   static void cb_ncomp(Fl_Menu_*, void*);
-  static Fl_Menu_Item menu_Right[];
 public:
   Fl_Double_Window *inpaintingDisplayWindow;
   static Fl_Menu_Item menu_Left1[];
 private:
-  void cb_source1_i(Fl_Menu_*, void*);
-  static void cb_source1(Fl_Menu_*, void*);
-  void cb_mask2_i(Fl_Menu_*, void*);
-  static void cb_mask2(Fl_Menu_*, void*);
+  void cb_source2_i(Fl_Menu_*, void*);
+  static void cb_source2(Fl_Menu_*, void*);
+  void cb_mask3_i(Fl_Menu_*, void*);
+  static void cb_mask3(Fl_Menu_*, void*);
   void cb_fill_i(Fl_Menu_*, void*);
   static void cb_fill(Fl_Menu_*, void*);
   void cb_unfilled_i(Fl_Menu_*, void*);
@@ -180,11 +204,11 @@ private:
   static void cb_confidence(Fl_Menu_*, void*);
   void cb_inpainted1_i(Fl_Menu_*, void*);
   static void cb_inpainted1(Fl_Menu_*, void*);
-  static Fl_Menu_Item menu_Right1[];
-  void cb_source2_i(Fl_Menu_*, void*);
-  static void cb_source2(Fl_Menu_*, void*);
-  void cb_mask3_i(Fl_Menu_*, void*);
-  static void cb_mask3(Fl_Menu_*, void*);
+  static Fl_Menu_Item menu_Right[];
+  void cb_source3_i(Fl_Menu_*, void*);
+  static void cb_source3(Fl_Menu_*, void*);
+  void cb_mask4_i(Fl_Menu_*, void*);
+  static void cb_mask4(Fl_Menu_*, void*);
   void cb_fill1_i(Fl_Menu_*, void*);
   static void cb_fill1(Fl_Menu_*, void*);
   void cb_unfilled1_i(Fl_Menu_*, void*);

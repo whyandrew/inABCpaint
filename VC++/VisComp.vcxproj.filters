@@ -78,6 +78,12 @@
     <ClCompile Include="..\src\inpainting\timer.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\pyramid\blend.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pyramid\pyramid.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\file_callbacks\callback_open_drawing.h">
@@ -126,6 +132,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\vxl_includes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\pyramid\pyramid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
