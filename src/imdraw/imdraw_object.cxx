@@ -98,7 +98,7 @@ bool imdraw_circle::draw(ImDraw* panel)
 		for (int i=0; i<360; i++) {
 			// we just use the angle parameterization for
 			// the circle to draw its vertices
-			double rads = i*3.14159265359/180;
+			double rads = i*vnl_math::pi/180;
 			glVertex2d(cos(rads)*(glr2-glr1)+glx1, 
 				sin(rads)*(glr2-glr1)+gly1);
 		}
@@ -131,10 +131,10 @@ void imdraw_vec::init(double dj, double di, int j, int i)
 	rot(0,1) = sin(angle_);
 	rot(1,0) = -sin(angle_);
 	rot(1,1) = cos(angle_);
-	v1(0) = 3*cos(3.14159265359/4);
-	v1(1) = -3*sin(3.14159265359/4);
-	v2(0) = -3*cos(3.14159265359/4);
-	v2(1) = -3*sin(3.14159265359/4);
+	v1(0) = 3*cos(vnl_math::pi/4);
+	v1(1) = -3*sin(vnl_math::pi/4);
+	v2(0) = -3*cos(vnl_math::pi/4);
+	v2(1) = -3*sin(vnl_math::pi/4);
 
 	vv1_ = rot * v1;
 	vv2_ = rot * v2;
@@ -144,6 +144,8 @@ void imdraw_vec::init(double dj, double di, int j, int i)
 	di_ = di;
 	dj_ = dj;
 	scale_ = 1;
+	thick_ = 1;
+	ascale_ = 1;
 }
 
 imdraw_vec::imdraw_vec(double dj, double di, int j, int i)
@@ -180,31 +182,73 @@ imdraw_vec::imdraw_vec(double dj, double di, int j, int i, double scale,
 	clear_ = clear;
 }
 
+imdraw_vec::imdraw_vec(int from_j, int from_i, int to_j, int to_i)
+{
+	double len;
+	int di, dj;
+	
+	dj = to_j-from_j;
+	di = to_i-from_i;
+	len = sqrt(dj*dj + di*di);
+	init(dj/len, di/len, from_j, from_i);
+
+	scale_ = len;
+}
+
+imdraw_vec::imdraw_vec(int from_j, int from_i, int to_j, int to_i, 
+					   double arrow_scale, double thick,
+					   double r, double g, double b, bool clear)
+{
+	double len;
+	int di, dj;
+	
+	dj = to_j-from_j;
+	di = to_i-from_i;
+	len = sqrt(dj*dj + di*di);
+	init(dj/len, di/len, from_j, from_i);
+
+	scale_ = len;
+
+	// set scale of the arrow
+	ascale_ = arrow_scale;
+	// set the line thickness
+	thick_ = thick;
+	// set the color
+	col_[0] = r;
+	col_[1] = g;
+	col_[2] = b;
+	// set the persistence flag
+	clear_ = clear;
+}
 
 bool imdraw_vec::draw(ImDraw* panel)
 {
 	double glx1, gly1, glx2, gly2;
 	double glx3, gly3, glx4, gly4;
 
-	// Draw the border of the rectangular region in red 
+	// Set the drawing color
 	glColor4dv(col_);
+	// Set the line thickness
+	glLineWidth(thick_);
 	
 	// convert VXL coordinates to GL coordinates
 	panel->vxl2gl(i_+0.5, j_+0.5, glx1, gly1);
 	panel->vxl2gl(i_+di_*scale_+0.5, j_+dj_*scale_+0.5, glx2, gly2);
-	panel->vxl2gl(i_+di_*scale_+vv1_(0)+0.5, j_+dj_*scale_+vv1_(1)+0.5, glx3, gly3);
-	panel->vxl2gl(i_+di_*scale_+vv2_(0)+0.5, j_+dj_*scale_+vv2_(1)+0.5, glx4, gly4);
+	panel->vxl2gl(i_+di_*scale_+vv1_(0)*ascale_+0.5, j_+dj_*scale_+vv1_(1)*ascale_+0.5, glx3, gly3);
+	panel->vxl2gl(i_+di_*scale_+vv2_(0)*ascale_+0.5, j_+dj_*scale_+vv2_(1)*ascale_+0.5, glx4, gly4);
 
 	glBegin(GL_LINES);
     {
 	    glVertex2d(glx1, gly1);
 	    glVertex2d(glx2, gly2);
-
+	}
+	glEnd();
+	glBegin(GL_POLYGON);
+	{
 		glVertex2d(glx2, gly2);
 		glVertex2d(glx3, gly3);
-
-		glVertex2d(glx2, gly2);
 		glVertex2d(glx4, gly4);
+		glVertex2d(glx2, gly2);
 	}
 	glEnd();
 
@@ -353,7 +397,7 @@ void imdraw_display_list::draw(ImDraw* panel)
 			if (obj->draw(panel) == true)
 				// if the object is NOT marked as cleared
 				// we add it back to the end of the queue
-				Q.push(obj);
+				Q.push(obj); 
 			else 
 				// otherwise, the object is deleted after drawing
 				delete obj;

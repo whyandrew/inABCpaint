@@ -15,12 +15,10 @@
 #include "imdraw_object.h"
 
 
-
 // THIS IS A PLACEHOLDER FOR FUTURE ASSIGNMENTS
 ////// PUT YOUR CODE (IF ANY) BETWEEN THESE LINES ///////
 
 /////////////////////////////////////////////////////////
-
 class ImDraw : public Fl_Gl_Window {  
  public:
      // The class constructor 
@@ -91,6 +89,7 @@ class ImDraw : public Fl_Gl_Window {
 	 void set_canonical_view();
 	 bool canonical_view();
 
+
 	 // routines for passing information from input/output widgets to the
 	 // imview class
 	 void update_pixel_data_in_ui(int i, int j, int band1, int band2, int band3);
@@ -141,6 +140,8 @@ class ImDraw : public Fl_Gl_Window {
      // parameters for keeping track of mouse position when
 	 // mouse started being dragged and its current position
      int pos1_i, pos1_j, pos2_i, pos2_j;
+	 bool isP;
+	 int lineid;
 	 // flag that controls behavior of drawing mode when
 	 // mouse is being dragged (check imdraw_handle.cxx)
 	 bool expand;

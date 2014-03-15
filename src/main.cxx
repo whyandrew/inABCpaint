@@ -14,11 +14,15 @@
 // code that implements the matting computations
 #include "matting/matting.h"
 
+// code that implements pyramid operations
+#include "pyramid/pyramid.h"
+
 
 // Routine for processing the command-line arguments (defined below)
 // It returns false if the program should exit immediately after this
 // function returns
-bool process_args(int argc, char** argv, matting& M, inpainting* I)
+bool process_args(int argc, char** argv, matting& M, inpainting* I,
+				  blending* B)
 {
      // What follows is the argument definition for the program
      // in the format required for automatic processing with vul_arg
@@ -79,7 +83,23 @@ bool process_args(int argc, char** argv, matting& M, inpainting* I)
 	 vul_arg<int> iradius(arg_list,"-iradius","Patch radius for inpainting", 4);
 	 // by default, we run the algorithm to completion
 	 vul_arg<int> niters(arg_list,"-iiter","Number of iterations to run", 0);
-     
+
+	 // blending options
+	 vul_arg<bool> blend(arg_list, "-blending", "Run the pyramid blending algorithm", false);
+	 vul_arg<vcl_string> bsource0(arg_list,"-bsource0","Input image that will serve as Source0","");
+	 vul_arg<vcl_string> bsource1(arg_list,"-bsource1","Input image that will serve as Source1","");
+	 vul_arg<vcl_string> bmask(arg_list,"-bmask","Input image that will serve as Mask","");
+	 vul_arg<vcl_string> bblend(arg_list,"-bblend","Output base filename for blended image","");
+	 vul_arg<bool> bgpyr0(arg_list, "-bgpyr0", "Save the gauss pyramid of Source0", false);
+	 vul_arg<bool> bgpyr1(arg_list, "-bgpyr1", "Save the gauss pyramid of Source1", false);
+	 vul_arg<bool> bgpyrm(arg_list, "-bgpyrm", "Save the gauss pyramid of Mask", false);
+	 vul_arg<bool> bgpyrb(arg_list, "-bgpyrb", "Save the gauss pyramid of the Blended image", false);
+	 vul_arg<bool> blpyr0(arg_list, "-blpyr0", "Save the Laplacian pyramid of Source0", false);
+	 vul_arg<bool> blpyr1(arg_list, "-blpyr1", "Save the Laplacian pyramid of Source1", false);
+	 vul_arg<bool> blpyrm(arg_list, "-blpyrm", "Save the Laplacian pyramid of Mask", false);
+	 vul_arg<bool> blpyrb(arg_list, "-blpyrb", "Save the Laplacian pyramid of the Blended image", false);
+
+    
      // Now set the switch for the help option
 
      arg_list.set_help_option("-help");
@@ -100,8 +120,186 @@ bool process_args(int argc, char** argv, matting& M, inpainting* I)
 	 // Note that to access the VALUE of a given argument we use the
 	 // notation arg_name()
 
+
+/*	 if (warping.set() == true) {
+		 vil_image_view<vxl_byte> source1 = load_image1(wsource1());
+		 vil_image_view<vxl_byte> source2 = load_image1(wsource2());
+		 vil_image_view<vxl_byte> mask = load_image1(wmask());
+		 vil_image_view<vxl_byte> blended;
+		 vil_image_view<vxl_byte> blended2;
+		 blend(source1, source2, mask, blended);
+		 blend2(source1, source2, mask, blended2);
+
+		 pyramid P1(source1);
+		 pyramid P2(source2);
+		 pyramid M(mask);
+		 for (int l=0; l<P1.N(); l++) {
+			 vil_image_view<vxl_byte> im;
+			 char name[80];
+			 P1.g(l,0,im);
+			 sprintf(name,"s1level_exp.%d.tif\0",l);
+			 vil_save(im,name);
+			 sprintf(name,"s1level.%d.tif\0",l);
+			 P1.g(l,l,im);
+			 vil_save(im,name);
+			 P2.g(l,0,im);
+			 sprintf(name,"s2level_exp.%d.tif\0",l);
+			 vil_save(im,name);
+			 sprintf(name,"s2level.%d.tif\0",l);
+			 P2.g(l,l,im);
+			 vil_save(im,name);
+			 M.g(l,0,im);
+			 sprintf(name,"mlevel_exp.%d.tif\0",l);
+			 vil_save(im,name);
+			 sprintf(name,"mlevel.%d.tif\0",l);
+			 M.g(l,l,im);
+			 vil_save(im,name);
+		 }
+		 vil_save(P1.pack_gauss(), "s1packg.tif");
+		 vil_save(P1.pack_laplacian(), "s1packl.tif");
+		 vil_save(P2.pack_gauss(), "s2packg.tif");
+		 vil_save(P2.pack_laplacian(), "s2packl.tif");
+	 }
+	 */
+
 	 //
-	 //    we will process the inpainting arguments first
+	 //    now we process the blending arguments
+	 //
+	 if (blend.set() == true) {
+		 // did the user supply an image for Source0?
+		 if (bsource0.set() == true) {
+			 vcl_cerr << "process_args(): loading input image(s) ..." << vcl_endl;
+			 if (B->set(B->Source0, load_image(bsource0())) == false) {
+				vcl_cerr << "blending::set: error reading image " << bsource0() << vcl_endl;
+				return false;
+			 }
+		 }
+		 // did the user supply an image for Source1?
+		 if (bsource1.set() == true) {
+			 vcl_cerr << "process_args(): loading input image(s) ..." << vcl_endl;
+			 if (B->set(B->Source1, load_image(bsource1())) == false) {
+				vcl_cerr << "blending::set: error reading image " << bsource1() << vcl_endl;
+				return false;
+			 }
+		 }
+		 // did the user supply an image for the Mask?
+		 if (bmask.set() == true) {
+			 vcl_cerr << "process_args(): loading input image(s) ..." << vcl_endl;
+			 if (B->set(B->Mask, load_image1(bmask())) == false) {
+				vcl_cerr << "blending::set: error reading image " << bmask() << vcl_endl;
+				return false;
+			 }
+		 }
+		 // if all 3 input images are provided, we run the blending algorithm automatically
+		 if (bsource0.set() && bsource1.set() && bmask.set()) {
+
+			 vcl_cerr << "process_args(): blending the images..." << vcl_endl;
+
+			if (B->compute() == false) {
+				// there was a problem in the computation, so we do not continue
+				// the non-interactive processing
+				vcl_cerr << "blending::compute(): An error occured -- exiting" << vcl_endl;
+				return (no_gui.set() == false);
+			}
+
+		 }
+		 // if the user has specified any output flags,  we write the results to disk
+		 if (bblend.set() == true) {
+			 // write the blending result
+			 if (B->save_blended(bblend().c_str()) == false)
+				 // the vcl_endl just adds a linebreak to the stream 
+				 vcl_cerr << "vil_save: error occured while saving blended image" << vcl_endl;
+		 }
+		 //
+		 // saving the Gauss pyramids
+		 //
+		 // write the source0 pyramid
+		 if (bgpyr0.set() == true) {
+			 bool ok;
+			 if (bblend.set() == true)
+				 ok = B->save_pyramid(B->Source0, true, bblend().c_str());
+			 else
+				 ok = B->save_pyramid(B->Source0, true, "Gauss");
+			 if (!ok)
+				 vcl_cerr << "vil_save: error occured while saving source0 pyramid" << vcl_endl;
+		 }
+		 // write the source1 pyramid
+		 if (bgpyr1.set() == true) {
+			 bool ok;
+			 if (bblend.set() == true)
+				 ok = B->save_pyramid(B->Source1, true, bblend().c_str());
+			 else
+				 ok = B->save_pyramid(B->Source1, true, "Gauss");
+			 if (!ok)
+				 vcl_cerr << "vil_save: error occured while saving source1 pyramid" << vcl_endl;
+		 }
+		 // write the mask pyramid
+		 if (bgpyrm.set() == true) {
+			 bool ok;
+			 if (bblend.set() == true)
+				 ok = B->save_pyramid(B->Mask, true, bblend().c_str());
+			 else
+				 ok = B->save_pyramid(B->Mask, true, "Gauss");
+			 if (!ok)
+				 vcl_cerr << "vil_save: error occured while saving mask pyramid" << vcl_endl;
+		 }
+		 // write the blended image pyramid
+		 if (bgpyrb.set() == true) {
+			 bool ok;
+			 if (bblend.set() == true)
+				 ok = B->save_pyramid(B->Blend, true, bblend().c_str());
+			 else
+				 ok = B->save_pyramid(B->Blend, true, "Gauss");
+			 if (!ok)
+				 vcl_cerr << "vil_save: error occured while saving blended image pyramid" << vcl_endl;
+		 }
+		 //
+		 // saving the Laplacian pyramids
+		 //
+		 // write the source0 pyramid
+		 if (bgpyr0.set() == true) {
+			 bool ok;
+			 if (bblend.set() == true)
+				 ok = B->save_pyramid(B->Source0, false, bblend().c_str());
+			 else
+				 ok = B->save_pyramid(B->Source0, false, "Laplacian");
+			 if (!ok)
+				 vcl_cerr << "vil_save: error occured while saving source0 pyramid" << vcl_endl;
+		 }
+		 // write the source1 pyramid
+		 if (bgpyr1.set() == true) {
+			 bool ok;
+			 if (bblend.set() == true)
+				 ok = B->save_pyramid(B->Source1, false, bblend().c_str());
+			 else
+				 ok = B->save_pyramid(B->Source1, false, "Laplacian");
+			 if (!ok)
+				 vcl_cerr << "vil_save: error occured while saving source1 pyramid" << vcl_endl;
+		 }
+		 // write the mask pyramid
+		 if (bgpyrm.set() == true) {
+			 bool ok;
+			 if (bblend.set() == true)
+				 ok = B->save_pyramid(B->Mask, false, bblend().c_str());
+			 else
+				 ok = B->save_pyramid(B->Mask, false, "Laplacian");
+			 if (!ok)
+				 vcl_cerr << "vil_save: error occured while saving mask pyramid" << vcl_endl;
+		 }
+		 // write the blended image pyramid
+		 if (bgpyrb.set() == true) {
+			 bool ok;
+			 if (bblend.set() == true)
+				 ok = B->save_pyramid(B->Blend, false, bblend().c_str());
+			 else
+				 ok = B->save_pyramid(B->Blend, false, "Laplacian");
+			 if (!ok)
+				 vcl_cerr << "vil_save: error occured while saving blended image pyramid" << vcl_endl;
+		 }
+	 }
+
+	 //
+	 //    now we process the inpainting arguments
 	 //
 
 	 if (iinpainting.set() == true) {
@@ -252,9 +450,10 @@ int main(int argc, char **argv) {
 	matting M;
 
 	inpainting* I = new inpainting();
+	blending* B = new blending();
 
 	// Get the command-line arguments (if any)  
-	if (process_args(argc, argv, M, I) == false)
+	if (process_args(argc, argv, M, I, B) == false)
 		return 0;
 	else {
 		 //
@@ -270,6 +469,9 @@ int main(int argc, char **argv) {
 		 // pass the UI panels to the inpainting interface
 		 I->add_panels(window->left_panel, window->right_panel);
 		 window->set_inpainting(I);
+		 // pass the UI panels to the blending interface
+		 B->add_panels(window->left_panel, window->right_panel);
+		 window->set_blending(B);
 
 	     // Display the UI windows
 	     window->show();

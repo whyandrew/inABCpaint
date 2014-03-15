@@ -114,7 +114,7 @@ Texture::Texture(vil_image_view<vil_rgb<vxl_byte> > im)
 	       0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
   // Copy image data to texture memory
   glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 
-		  ni, nj,
+		  (int)ni, (int)nj,
 		  GL_RGB, GL_UNSIGNED_BYTE, tex_data);
 
   // Set texturing parameters
@@ -129,8 +129,7 @@ Texture::Texture(vil_image_view<vil_rgb<vxl_byte> > im)
   glEnable(GL_TEXTURE_2D);
 
   // free allocated memory
-  free(tex_data);
-  flipped.clear();
+  //delete tex_data;
 }
 
 void Texture::refresh(vil_image_view<vil_rgb<vxl_byte> > im)

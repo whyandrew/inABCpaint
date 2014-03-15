@@ -44,10 +44,10 @@ FLUID = fluid
 %.cxx: %.fl
 	$(FLUID) -c $<
 
-
 BASIC_OBJ   = gl/glutils.o gl/Texture.o main.o file/load_image.o
 
 IMDRAW_OBJ  = imdraw/imdraw_utils.o imdraw/imdraw_init.o imdraw/imdraw_draw.o imdraw/imdraw_handle.o imdraw/read_drawing.o imdraw/imdraw_object.o
+
 UI_OBJ      = VisCompUI.o
 
 MISSING_VXL_OBJ = vil_trace_8con_boundary.o
@@ -56,16 +56,22 @@ UI_CPP      = VisCompUI.cxx VisCompUI.h
 
 MATTING_OBJ = matting/matting.o matting/matting_algorithm.o
 
-INPAINTING_OBJ = inpainting/inpainting.o inpainting/inpainting_algorithm.o inpainting/inpainting_debug.o inpainting/psi.o
+INPAINTING_OBJ = inpainting/inpainting.o inpainting/inpainting_algorithm.o inpainting/inpainting_debug.o inpainting/psi.o  inpainting/inpainting_eval.o inpainting/patch_db.o
 
-STUDENT_OBJ = inpainting/inpainting_eval.o inpainting/patch_db.o
+BLENDING_OBJ = 
+
+STUDENT_OBJ = pyramid/pyramid.o pyramid/blend.o
 
 
-imdraw-code/viscomp:	$(UI_CPP) $(BASIC_OBJ) $(UI_OBJ) $(MISSING_VXL_OBJ) $(MATTING_OBJ) $(IMDRAW_OBJ) $(INPAINTING_OBJ) $(STUDENT_OBJ)
 
-	$(CC) -o ../bin/viscomp $(BASIC_OBJ) $(UI_OBJ) $(MISSING_VXL_OBJ) $(MATTING_OBJ) $(IMDRAW_OBJ) $(INPAINTING_OBJ) $(STUDENT_OBJ) $(LDFLAGS)
+
+imdraw-code/viscomp:	$(UI_CPP) $(BASIC_OBJ) $(UI_OBJ) $(MISSING_VXL_OBJ) $(MATTING_OBJ) $(IMDRAW_OBJ) $(INPAINTING_OBJ) $(BLENDING_OBJ) $(STUDENT_OBJ)
+
+	$(CC) -o ../bin/viscomp $(BASIC_OBJ) $(UI_OBJ) $(MISSING_VXL_OBJ) $(MATTING_OBJ) $(IMDRAW_OBJ) $(INPAINTING_OBJ) $(BLENDING_OBJ) $(STUDENT_OBJ) $(LDFLAGS)
+
+
 
 clean:		
 
-	rm -rf $(BASIC_OBJ) $(UI_OBJ) $(MISSING_VXL_OBJ) $(STUDENT_OBJ) $(UI_CPP) $(MATTING_OBJ) $(IMDRAW_OBJ) $(INPAINTING_OBJ)
+	rm -rf $(BASIC_OBJ) $(UI_OBJ) $(STUDENT_OBJ) $(UI_CPP) $(IMDRAW_OBJ) $(BLENDING_OBJ)
 

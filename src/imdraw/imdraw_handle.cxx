@@ -8,8 +8,6 @@
 #include "imdraw.h"
 
 
-
-
 // DO NOT MODIFY THIS FILE FOR A1
 // IT IS A PLACEHOLDER FOR FUTURE ASSIGNMENTS
 
@@ -39,6 +37,8 @@ bool ImDraw::drawing_mode()
 	return (view_mode == Draw);
 }
 
+
+
 // define an example event handler that intercepts Mouse-1 events in
 // order to draw a rectangle over an image by clicking and dragging
 // the Mouse-1 button
@@ -50,22 +50,16 @@ int ImDraw::handle(int event) {
      //  code below or whether it should be passed on to the default
      //  fltk handler
      int intercepted=0;
-     
      // this is how you can change the appearance of the cursor
      cursor(FL_CURSOR_CROSS, FL_WHITE, FL_BLACK);
 
 	 // mouse event also handling depends on the current mode of the interface
 	 switch (view_mode) {
-     //
-	 // Handling events in image-drawing mode
-	 //
-	 // In image-drawing mode, dragging the mouse causes a rectangle to
-	 // be drawn
-	 //
 	 case Draw:
 	  switch (event) {
+		case FL_FOCUS:
 		case FL_ENTER:
-	    case FL_MOVE:
+			intercepted = 1;
 			break;
 		case FL_PUSH: {
 			// get mouse coordinates
@@ -161,6 +155,10 @@ int ImDraw::handle(int event) {
      //
 	 case Browse:
 	     switch (event) {
+		case FL_FOCUS:
+		case FL_ENTER:
+			intercepted = 1;
+			break;
 		 case FL_MOVE:
 			   int center_j, center_i;
 			   mousex = Fl::event_x();
@@ -175,8 +173,6 @@ int ImDraw::handle(int event) {
 											current_image(center_i,center_j).r,
 											current_image(center_i,center_j).g,
 											current_image(center_i,center_j).b);
-		  break;
-		 case FL_ENTER:
 		  break;
 	     case FL_PUSH:
 		   // when user clicks the left mouse button

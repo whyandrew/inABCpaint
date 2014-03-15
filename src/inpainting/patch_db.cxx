@@ -107,60 +107,11 @@ bool patch_db::lookup(
 	///////////////////////////////////////////////////////////
 	//              PLACE YOUR CODE HERE                     //
 	///////////////////////////////////////////////////////////
-    
-    double maxSSD = 255*255*3*plen_;
-    double threshold = maxSSD / 50.0;
-    double bestSSD; // current best sum of square differences value
-    bestSSD = maxSSD;
-    match = -1;
 
-    double patchSSD;
-    int matSize = 2* w_ + 1;
-    int pixelCoord[2];
-    int baseCoord[2];
+	// dummy implementation: always returns the center of the 
+	// patch indexed by top_/2 as the result of the lookup operation
 
-    // loop thru each patch
-    for (int indexPatch = 0; indexPatch < top_; indexPatch++)
-    {
-        patchSSD = 0.0;
-        baseCoord[0] = patch_center_coords_(indexPatch, 0) - w_ ;
-        baseCoord[1] = patch_center_coords_(indexPatch, 1) - w_ ;
-        // for each pixel of patch. 
-        for (int iRow = 0; iRow < matSize && patchSSD < bestSSD; iRow++)
-        {
-            for (int iCol = 0; iCol < matSize && patchSSD < bestSSD; iCol++)
-            {
-                // Ignore unfilled pixel or if patchSSD is already too much
-                if (!target_unfilled(iRow, iCol)/* && patchSSD < bestSSD*/)
-                {
-                    pixelCoord[0] = baseCoord[0] + iRow;
-                    pixelCoord[1] = baseCoord[1] + iCol;
-                    // Calculate sum of squared diff for each channel
-                    patchSSD += pow((target_planes[0](iRow, iCol) - 
-                            im_(pixelCoord[0], pixelCoord[1]).r), 2);
-                    if (patchSSD >= bestSSD) 
-                        break;
-                    patchSSD += pow((target_planes[1](iRow, iCol) - 
-                            im_(pixelCoord[0], pixelCoord[1]).g), 2);
-                    if (patchSSD >= bestSSD) 
-                        break;
-                    patchSSD += pow((target_planes[2](iRow, iCol) - 
-                            im_(pixelCoord[0], pixelCoord[1]).b), 2);
-                }
-            }
-        }
-
-
-        if (patchSSD < bestSSD)
-        {
-            bestSSD = patchSSD;
-            match = indexPatch; 
-            if (indexPatch > 2)
-                indexPatch -= 2;
-        }
-        else
-            indexPatch += (matSize);
-    }
+	match = top_/2;
 
 	///////////////////////////////////////////////////////////
 	//     DO NOT CHANGE ANYTHING BELOW THIS LINE            //

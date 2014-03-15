@@ -196,7 +196,6 @@ psi psi::expand(int i)
 	psi expanded(*this);
 
 	expanded.w_ = w_+ i;
-	expanded.sz_ = 2*expanded.w_ + 1;
 
 	return expanded;
 }

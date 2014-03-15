@@ -45,6 +45,8 @@ ImDraw::ImDraw(int x,int y,int w,int h,const char *l)
 	 pos1_i = pos1_j = pos2_i = pos2_j = 0;
 	 brush_radius = 10;
 	 shift_pressed = false;
+	 lineid = -1;
+
 
      ////////////////////////////////////////////////////////////////////////
 };

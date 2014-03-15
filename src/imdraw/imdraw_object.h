@@ -57,6 +57,7 @@ protected:
 public:
 	object_type id();
 	virtual bool draw(ImDraw* panel) = 0;
+	//virtual int data(double* d) = 0;
 	void clear();
 };
 
@@ -78,6 +79,13 @@ public:
 	void clear();
 	// delete the object at the tail of the queue
 	void undo();
+	// return a pointer to an array containing all 
+	// persistent objects of the specified type; the 
+	// method returns the total number of objects in
+	// the array; the method uses a copy constructor
+	// so the objects in the array can be deleted at will
+	//int get(enum object_type, imdraw_object** obj);
+
 	// IMPORTANT: the class assumes that all objects
 	// pushed on the queue are NOT re-used elsewhere.
 	// THE ROUTINE FREES THE MEMORY OF OBJECTS THAT ARE POPPED 
@@ -168,6 +176,11 @@ class imdraw_vec : public imdraw_object {
 	// a scaling that controls the vector's length in the
 	// direction (di_, dj_)
 	double scale_;
+	// line thickness
+	double thick_;
+	// scaling of the arrow at tip of vector
+	double ascale_;
+
 	//
 	// internal parameters
 	//
@@ -183,6 +196,9 @@ public:
 	imdraw_vec(double dj, double di, int j, int i, double scale,
 		        double r, double g, double b,
 				bool clear);
+	imdraw_vec(int from_j, int from_i, int to_j, int to_i);
+	imdraw_vec(int from_j, int from_i, int to_j, int to_i, 
+		       double arrow_scale, double thick, double r, double g, double b, bool clear);
 	bool draw(ImDraw* panel);
 };
 

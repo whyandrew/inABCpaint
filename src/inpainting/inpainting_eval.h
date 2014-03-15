@@ -94,23 +94,6 @@ bool compute_gradient(psi& PSI,
 					  const vil_image_view<bool>& unfilled, 
 					  vnl_double_2& grad);
 
-// Helper functions for compute_normal
-
-bool getAdjacentPixel(
-    const vnl_matrix<int>& front_mat,
-    int& row, int& col);
-
-bool getDiagonalPixel(
-    const vnl_matrix<int>& front_mat,
-    int& row, int& col);
-
-int parseCoordVer2(
-    const vnl_matrix<int>& front_mat,
-    vnl_vector<int>& XCoord,
-    vnl_vector<int>& YCoord,
-    int& tCenter,
-    int stepInward);
-
 
 #endif
 

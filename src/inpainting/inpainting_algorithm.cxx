@@ -9,7 +9,6 @@
 #include "inpainting.h"
 #include "inpainting_eval.h"
 
-#include <ctime>
 
 //
 //  The Exemplar-Based Inpainting algorithm
@@ -111,18 +110,6 @@ bool inpainting::compute(int max_iterations)
 
 	outdated_ = false;
 
-    /*
-    vcl_cerr << "Compoute loop:\t" << time_compute << " ms" << vcl_endl;
-    vcl_cerr << "compute_C: \t" << time_conf << " ms,\t" << count_conf << " calls,\t" <<
-        1000*time_conf/ count_conf << " us average"<< vcl_endl;
-    vcl_cerr << "compute_gradient: " << time_gradient << " ms, " << count_gradient << " calls, " <<
-        1000*time_gradient/ count_gradient << " us average"<< vcl_endl;
-    vcl_cerr << "compute_normal: " << time_normal << " ms,\t" << count_normal << " calls,\t" <<
-        1000*time_normal/ count_normal << " us average"<< vcl_endl;
-    vcl_cerr << "patchdb_lookup: " << time_lookup << " ms, " << count_lookup << " calls,\t" <<
-        time_lookup/ count_lookup << " ms average" << vcl_endl;
-    */
-    
 	return true;
 }
 
@@ -188,10 +175,6 @@ void inpainting::inpaint_region(
 
 		// if debugging is on, draw it in yellow on the UI panels
 		debug_draw_patch(PSI_hat_p, 1, 1, 0);
-#ifdef DEBUG320
-        vcl_cerr << "PSI_hat_p Priority: " << PSI_hat_p.P() << "\n";  
-        vcl_cerr << "PSI_hat_p Data: " << PSI_hat_p.D() << "\n";
-#endif
 
 		// Step 2b: find the 'example' patch, psi_hat_q, in the 
 		//          original image that is most similar to this 
@@ -281,11 +264,8 @@ void inpainting::recompute_patch_priorities()
 			          patch_gradient, front_normal);
 
 		// update the patch priority
-#ifdef DEBUG320
-        PSI.set_P(c * d, c, d);
-#else
 		PSI.set_P(c * d, c, d);
-#endif
+
 		// if the pixel at the patch center has not been filled already,
 		// push the patch back onto the second priority queue
 		if ( unfilled_((int)(PSI.p()(0)), (int)(PSI.p()(1))) )
@@ -320,9 +300,7 @@ psi inpainting::find_best_match(const psi& patch)
 	// and store the information in a global variable
 	d = compute_D(target_patch, inpainted_grey_, unfilled_, 
 		          fill_front_, alpha_, gradient, front_normal);
-#ifdef DEBUG320  
-    vcl_cerr << "Target D = " << d << "\n";
-#endif
+
 	// draw the vectors corresponding to the image gradient
 	// and the fill front normal at the center of best_patch
 	// draw the gradient in red
@@ -377,6 +355,7 @@ psi inpainting::find_best_match(const psi& patch)
 	debug_print_psi(best_source_patch, 
 	                vil_plane(vil_view_as_planes(inpainted_), 0), 
 	                "best source patch:");
+
 	return best_source_patch;
 }
 
