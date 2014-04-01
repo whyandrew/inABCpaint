@@ -14,7 +14,94 @@ bool blend(
 		vil_image_view<vxl_byte>& result)
 {
 	// run a dummy routine
-	return blend2(source0, source1, mask, result);
+	//return blend2(source0, source1, mask, result);
+
+    // make sure image dimensions match
+	if ((source0.ni() != source1.ni()) ||
+		(source0.nj() != source1.nj()) ||
+		(source0.nplanes() != source1.nplanes()) ||
+		(source0.ni() != mask.ni()) ||
+		(source0.nj() != mask.nj()))
+		return false;
+
+    pyramid pyr0 = pyramid(source0);
+    pyramid pyr1 = pyramid(source1);
+    pyramid pyrMask = pyramid(mask);
+    
+    // get the num of levels
+    const int numN = pyr0.N();
+    int numP = source0.nplanes();
+    int numI, numJ;
+    // get lap pyramid of sources
+    vil_image_view<int> *lap0 = pyr0.L();
+    vil_image_view<int> *lap1 = pyr1.L();
+    // get gau pyramid of mask
+    vil_image_view<vxl_byte> *gMask = pyrMask.g();
+    // array for lap pyramid of result
+    vil_image_view<int> *lapRes = new vil_image_view<int>[numN];
+
+    // Gau index 0 to N inclusive
+    // Lap index 0 to N-1 inclusive
+
+    // Base level (smallest)
+    vil_image_view<vxl_byte> gau0;
+    vil_image_view<vxl_byte> gau1;
+    vil_image_view<vxl_byte> gResN;
+    pyr0.g(numN, gau0);
+    pyr1.g(numN, gau1);
+
+    numI = gau0.ni();
+    numJ = gau0.nj();
+
+    gResN.set_size(numI, numJ, numP);
+
+    for (int p = 0; p < numP; p++)
+    {
+        for (int i = 0 ; i < numI; i++)
+        {
+            for (int j = 0; j < numJ; j++)
+            {
+
+#ifdef DEBUG320
+                double dbgCheckPt = gMask[numN](i, j);
+                dbgCheckPt = gau0(i, j, p);
+                dbgCheckPt = gMask[numN](i, j);
+                dbgCheckPt = gau1(i, j, p);
+#endif
+                gResN(i, j, p) = (1.0 - ((double)gMask[numN](i, j)/255.0)) 
+                    * (double)gau0(i, j, p)
+                    + ((double)gMask[numN](i, j)/255.0) * (double)gau1(i, j, p);
+            }
+        }
+    }
+
+    // Get all lap image for result
+    for (int n = 0; n < numN; n++)
+    {
+        numI = lap0[n].ni();
+        numJ = lap0[n].nj();
+        lapRes[n].set_size(numI, numJ, numP);
+        for (int p = 0; p < numP; p++)
+        {
+            for (int i = 0; i < numI; i++)
+            {
+                for (int j = 0; j < numJ; j++)
+                {
+                    lapRes[n](i, j, p) = 
+                        (1.0 - ((double)gMask[n](i, j)/255.0)) * (double)lap0[n](i,j,p)
+                        + ((double)gMask[n](i, j)/255.0) * (double)lap1[n](i, j, p);
+                }
+
+            }
+
+        }
+    }
+
+    //Construct result pyramid to the top
+    pyramid pyrResult = pyramid (lapRes, gResN, numN, pyr0.a());
+    pyrResult.g(0, result);
+    return true;
+
 }
 
 ////////////////////////////////////////////////////////////////

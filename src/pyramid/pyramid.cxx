@@ -355,6 +355,128 @@ void pyramid::reduce(const vil_image_view<vxl_byte> im,
 	///////////////////////////////////////////////////////////
 	//              PLACE YOUR CODE HERE                     //
 	///////////////////////////////////////////////////////////
+
+    // Smooth every even pixel on 1-dimension from input image "im",
+    // and save to reduced imaged im_red
+    // Need to loop thru each plane of the image
+
+    // Allocate mem for im_red
+    int imSize = (im.ni() / 2) + 1;
+    im_red.set_size(imSize, imSize, im.nplanes());
+    // A temp intermediate image after 1-dimension horizontally reduced
+    vil_image_view<vxl_byte> tmpIm = vil_image_view<vxl_byte>(imSize, im.nj(), im.nplanes());
+
+    int maxI = im.ni();
+    int maxJ = im.nj();
+    const int maxIminus1 = maxI - 1;
+    const int maxJminus1 = maxJ - 1;
+    double value = 0;
+    double edgeWeight = w_hat[0] + w_hat[1] + w_hat[2]; //assume symetrical kernel
+    double fullWeight = 0;
+    for (int i = -2; i < 3; i++)
+        fullWeight += w_hat[i];
+
+    for (int p = 0; p < im.nplanes(); p++)
+    {
+        //Reduce horizontally
+        for (int j = 0; j < maxJ; j++)
+        {
+            for (int i = 0; i < maxI; i += 2)
+            {
+                value = 0;
+                //Check for edge cases
+                if (i == 0)
+                {
+                    for (int k = 0; k < 3; k++)
+                    {
+                        value += (w_hat[k] * im(i+k, j, p));
+                    }
+                    //Scale it back to max of 1
+                    value = value / edgeWeight;
+                    tmpIm(0, j, p) = (vxl_byte)floor(value+0.49999);
+#ifdef DEBUG320
+                    double dbgCheckPt = tmpIm(0, j, p);
+                    dbgCheckPt = 0;
+#endif
+                }
+                else if (i == maxIminus1)
+                {
+                    for (int k = -2; k < 1; k++)
+                    {
+                        value += (w_hat[k] * im(i+k, j, p));
+                    }
+                    //Scale it back to max of 1
+                    value = value / edgeWeight;
+                    tmpIm(i/2, j, p) = (vxl_byte)floor(value+0.49999);
+#ifdef DEBUG320
+                    double dbgCheckPt = tmpIm(0, j, p);
+                    dbgCheckPt = 0;
+#endif
+                }
+                else
+                { // non-edge cases
+                    for (int k = -2; k < 3; k++)
+                    {
+                        value += (w_hat[k] * im(i+k, j, p));
+                    }
+                    // Kernel is already weighed = 1
+                    tmpIm(i/2, j, p) = (vxl_byte)floor((value/fullWeight)+0.49999);
+#ifdef DEBUG320
+                    double dbgCheckPt = tmpIm(i/2, j, p);
+                    dbgCheckPt = 0;
+#endif
+                }
+            }
+        }
+
+        //Reduce vertically
+        for (int j = 0; j < maxJ; j += 2)
+        {
+            for (int i = 0; i < imSize; i++)
+            {
+                value = 0;
+                //Check for edge cases
+                if (j == 0)
+                {
+                    for (int k = 0; k < 3; k++)
+                    {
+                        value += (w_hat[k] * tmpIm(i, j+k, p));
+                    }
+                    //Scale it back to max of 1
+                    value = value / edgeWeight;
+                    im_red(i, j/2, p) = (vxl_byte)floor(value+0.49999);
+#ifdef DEBUG320
+                    double dbgCheckPt = im_red(i, j/2, p);
+                    dbgCheckPt = 0;
+#endif
+                }
+                else if (j == maxJminus1)
+                {
+                    for (int k = -2; k < 1; k++)
+                    {
+                        value += (w_hat[k] * tmpIm(i, j+k, p));
+                    }
+                    //Scale it back to max of 1
+                    value = value / edgeWeight;
+                    im_red(i, j/2, p) = (vxl_byte)floor(value+0.49999);
+                }
+                else
+                { // non-edge cases
+                    for (int k = -2; k < 3; k++)
+                    {
+                        value += (w_hat[k] * tmpIm(i, j+k, p));
+                    }
+                    // Kernel is already weighed = 1
+                    im_red(i, j/2, p) = (vxl_byte)floor((value/fullWeight)+0.49999);
+#ifdef DEBUG320
+                    double dbgCheckPt = im_red(i, j/2, p);
+                    dbgCheckPt = 0;
+#endif
+                }
+            }
+        }
+    }
+
 }
 
 //
@@ -385,7 +507,17 @@ void pyramid::expand(const vil_image_view<vxl_byte> im,
 	//              PLACE YOUR CODE HERE                     //
 	///////////////////////////////////////////////////////////
 
-}
+    // Just convert type and call the byte version of "expand" 
+    vil_image_view<int> tmpIm = vil_image_view<int>(im.ni(), im.nj(), im.nplanes());
+    vil_convert_cast(im, tmpIm);
+
+    vil_image_view<int> tmpIm_exp;
+    expand(tmpIm, w_hat, tmpIm_exp);
+    vil_convert_cast(tmpIm_exp, im_exp);
+    //int_to_ubyte(tmpIm_exp, im_exp); 
+    // ^^^^ that function's description was NOT CLEAR, wasted me half a day damnit
+    // Would be good to mention all values are increased by 127!!! before casting to ubyte!
+ }
 
 void pyramid::expand(const vil_image_view<int> im, 
 		             const double* w_hat, 
@@ -394,6 +526,99 @@ void pyramid::expand(const vil_image_view<int> im,
 	///////////////////////////////////////////////////////////
 	//              PLACE YOUR CODE HERE                     //
 	///////////////////////////////////////////////////////////
+
+    // Make copies of kernel for even and odd pixel
+    // So no need to reweight value of every pixel
+    // Assume kernel is symmetrical, so kernel for odd pixel is just {0.5, 0.5}
+    double *evenKern;
+    // "Even" is the one of size 3, since we start index=0
+    evenKern = new double[3];
+    double weight = 0;
+    for (int i = -2, j = 0; i < 3; i+=2, j++)
+    {
+        evenKern[j] = w_hat[i];
+        weight += w_hat[i];
+    }
+    for (int i = 0; i< 3; i++)
+    {
+        evenKern[i] /= weight;
+    }
+    // Change evenKern index from -1 to 1
+    evenKern = evenKern + 1;
+
+    //Allocate mem to im_exp
+    int imSize = (im.ni() - 1) * 2 + 1;
+    im_exp.set_size(imSize, imSize, im.nplanes());
+
+    double value = 0;
+    bool isEven = true;
+    int imSizeMinus1 = imSize - 1;
+
+    for (int p=0; p < im.nplanes(); p++)
+    {
+        //Expand horizontally
+        // So alternating ROWS will be fully filled in the expanded image
+        for (int j = 0; j < imSize ; j += 2)
+        {
+            //Deal with the edge cases first
+            // first and last pixels, both are even
+            weight = evenKern[0] + evenKern[1];
+            value = (evenKern[0] * im(0, j/2, p)) + (evenKern[1] * im(1, j/2, p));
+            value = value / weight;
+            im_exp(0, j, p) = (int)floor(value+0.49999);
+
+            value = (evenKern[-1] * im(im.ni() - 2, j/2, p)) +
+                (evenKern[0] * im(im.ni() - 1, j/2, p));
+            value = value / weight;
+            im_exp(imSizeMinus1, j, p) = (int)floor(value+0.49999);
+
+            isEven = false;
+            // Below are the non-edge cases
+            for (int i = 1; i < imSizeMinus1; i++)
+            {
+                value = 0.0;
+                // The current i,j are index of the expanded image
+                // Need index of the original image when getting value        
+                if (isEven)
+                {
+                    //Intepolate from 3 pixels
+                    for (int k = -1; k < 2; k++)
+                    {
+                        value += (im((i/2)+k, j/2, p) * evenKern[k]);
+                    }
+                }
+                else //odd index
+                {
+                    //Intepolate from 2 pixels only
+                    value = (im(i/2, j/2, p) + im((i/2)+1, j/2, p)) / 2;
+                }
+
+                isEven = !isEven;
+                // Kernel is already re-weighted, should not need to normalize here
+                im_exp(i, j, p) = (int)floor(value+0.49999);
+#ifdef DEBUG320
+                double dbgCheckPt = im_exp(i, j, p);
+                dbgCheckPt = 0;
+#endif
+            }
+        }
+
+        //Expand vertically
+        // ONLY odd index rows to be filled, each of the pixel interpolate vertically
+        for (int j = 1; j < imSize; j += 2)
+        {
+            for (int i = 0; i < imSize; i++)
+            {
+                // No edge case, 
+                // since first and last rows (both even index) should be filled already 
+                im_exp(i, j, p) = (im_exp(i, j-1, p) + im_exp(i, j+1, p)) / 2 ;
+#ifdef DEBUG320
+                double = dbgCheckPt = im_exp(i, j, p);
+                dbgCheckPt = 0;
+#endif
+            }
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////
